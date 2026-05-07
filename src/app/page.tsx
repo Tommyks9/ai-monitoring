@@ -11,6 +11,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
+import { TaskCreator } from "@/components/dashboard/task-creator";
 import { getMonitoringSnapshot } from "@/lib/monitoring-source";
 import type { AgentStatus, TaskPriority, TaskState, TeamMetric } from "@/lib/monitoring-types";
 
@@ -87,6 +88,8 @@ export default async function Home() {
   } = await getMonitoringSnapshot();
   const blockedItems = workItems.filter((item) => item.state === "blocked");
   const criticalItems = workItems.filter((item) => item.priority === "critical");
+  const ownerOptions = agentRuns.map((agent) => agent.agentName);
+  const serviceOptions = ["all services", "/libs/common", ...serviceReadiness.map((service) => service.name)];
 
   return (
     <main className="min-h-screen px-6 py-8 sm:px-10 lg:px-12">
@@ -231,6 +234,12 @@ export default async function Home() {
             eyebrow="Execution queue"
             title="Active task board"
             description="Use this view to see which agent owns each work item, what gate must pass and where attention is needed."
+          />
+          <TaskCreator
+            owners={ownerOptions}
+            services={serviceOptions}
+            runtimeConnected={source.mode === "remote"}
+            runtimeDetail={source.detail}
           />
           <div className="mt-6 overflow-hidden rounded-3xl border border-white/10">
             <div className="grid grid-cols-12 gap-4 border-b border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">

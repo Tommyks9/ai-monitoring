@@ -42,6 +42,14 @@ npm run dev
 http://localhost:3000
 ```
 
+จากหน้า dashboard ให้ใช้กล่อง **Create work item** เพื่อสั่งงานเข้า Agent Runtime ได้ทันที:
+
+- เลือก owner agent
+- เลือก service
+- ตั้ง priority
+- ใส่ acceptance gate
+- กด **Send to agent queue**
+
 Agent Runtime จะอยู่ที่:
 
 ```text
@@ -84,6 +92,7 @@ npm run build
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
 - `runtime/agent-runtime.mjs` - local Agent Runtime API สำหรับส่งสถานะ agents/tasks/events ให้ dashboard
 - `src/app/page.tsx` - Next.js dashboard หน้า command center
+- `src/app/api/runtime/work-items/route.ts` - server-side proxy สำหรับส่ง task จาก dashboard ไป Agent Runtime
 
 ### วิธีเริ่มใช้งาน
 

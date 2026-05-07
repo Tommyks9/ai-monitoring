@@ -80,6 +80,14 @@ POST /api/agent-runs/:id/heartbeat
 PATCH /api/work-items/:id/state
 ```
 
+Dashboard มี server-side proxy สำหรับสร้างงานจากหน้าเว็บ:
+
+```http
+POST /api/runtime/work-items
+```
+
+proxy นี้จะ forward ไปที่ `AGENT_RUNTIME_URL/api/work-items` พร้อม bearer token ถ้ามีค่า `AGENT_RUNTIME_TOKEN`
+
 ## Storage Recommendation
 
 - **PostgreSQL** สำหรับ work items, agent runs, handoffs และ audit log

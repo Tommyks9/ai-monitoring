@@ -61,7 +61,33 @@ http://localhost:3000
 
 ถ้าลบหรือเว้นว่าง `AGENT_RUNTIME_URL` หน้า dashboard จะ fallback ไปใช้ mock data ที่อยู่ใน repo
 
-## 4. ต่อกับ remote agent runtime
+## 4. สั่งงานทีมจากหน้า dashboard
+
+ในหน้า `http://localhost:3000` จะมีกล่อง **Create work item**
+
+ให้กรอก:
+
+1. **Task title** - งานที่ต้องการให้ agent ทำ
+2. **Owner agent** - agent ที่รับผิดชอบ
+3. **Service** - service หรือ scope ที่เกี่ยวข้อง
+4. **Priority** - critical/high/medium/low
+5. **Acceptance gate** - เงื่อนไขที่ต้องผ่านก่อนปิดงาน
+
+เมื่อกด **Send to agent queue** dashboard จะยิงคำสั่งผ่าน server-side proxy:
+
+```http
+POST /api/runtime/work-items
+```
+
+แล้ว proxy ต่อไปยัง Agent Runtime:
+
+```http
+POST http://localhost:4000/api/work-items
+```
+
+วิธีนี้ช่วยไม่ให้ token ของ runtime ถูกส่งไปอยู่ฝั่ง browser โดยตรง
+
+## 5. ต่อกับ remote agent runtime
 
 ถ้าคุณ deploy runtime ไว้ที่ server หรือ VM ให้แก้ไฟล์ `.env.local` บน Mac:
 
@@ -91,7 +117,7 @@ GET /api/services/readiness
 Authorization: Bearer <AGENT_RUNTIME_TOKEN>
 ```
 
-## 5. Local runtime endpoints
+## 6. Local runtime endpoints
 
 runtime local ที่มากับ repo รองรับ endpoints เหล่านี้:
 
@@ -134,7 +160,7 @@ curl -X POST http://localhost:4000/api/agent-runs/lead-developer-agent/heartbeat
   }'
 ```
 
-## 6. รูปแบบข้อมูลที่ remote ต้องส่ง
+## 7. รูปแบบข้อมูลที่ remote ต้องส่ง
 
 ให้ remote runtime ส่ง JSON ตาม contract ใน:
 
@@ -162,7 +188,7 @@ blueprints/monitoring-schema.json
 ]
 ```
 
-## 7. ถ้า remote ยังไม่ public
+## 8. ถ้า remote ยังไม่ public
 
 คุณมี 2 ทางเลือก:
 
@@ -181,7 +207,7 @@ ngrok http 4000
 AGENT_RUNTIME_URL=https://xxxx.ngrok-free.app
 ```
 
-## 8. ถ้าจะให้คนอื่นเปิดดู dashboard บน Mac ของคุณ
+## 9. ถ้าจะให้คนอื่นเปิดดู dashboard บน Mac ของคุณ
 
 ตัวนี้เป็นอีกกรณีหนึ่ง: ถ้าคุณรัน dashboard บน Mac แล้วอยากให้คนอื่นเปิดดูจากข้างนอก ให้ tunnel port 3000:
 
@@ -191,7 +217,7 @@ ngrok http 3000
 
 แต่การ tunnel dashboard ไม่ได้ทำให้มีข้อมูล remote เอง ข้อมูล remote ยังต้องมาจาก `AGENT_RUNTIME_URL`
 
-## 9. หมายเหตุด้านความปลอดภัย
+## 10. หมายเหตุด้านความปลอดภัย
 
 - อย่าใส่ token ใน `NEXT_PUBLIC_*`
 - ใช้ `AGENT_RUNTIME_TOKEN` เพราะ Next.js อ่านฝั่ง server เท่านั้น
