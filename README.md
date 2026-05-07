@@ -21,10 +21,20 @@ repo นี้เริ่มวาง foundation สำหรับทีม AI
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 เปิดเว็บที่ `http://localhost:3000`
+
+ถ้าต้องการให้ dashboard บน Mac ดู agents ที่รันอยู่บน remote ให้ตั้งค่าใน `.env.local`:
+
+```bash
+AGENT_RUNTIME_URL=https://your-agent-runtime.example.com
+AGENT_RUNTIME_TOKEN=optional-secret-token
+```
+
+ถ้าไม่ตั้งค่า dashboard จะใช้ mock data ใน repo และยัง run ได้ปกติ
 
 ### Validate
 
@@ -42,6 +52,7 @@ npm run build
 - `docs/agents/README.md` - prompt pack ภาษาไทยสำหรับ Architect, Shared Lib, Database, Lead Dev, Frontend, Documentation และ QA agents
 - `docs/operations/agent-operating-model.md` - workflow, handoff, quality gates และลำดับการทำงานของทีม
 - `docs/operations/monitoring-dashboard.md` - data contract และ roadmap สำหรับต่อ orchestrator/backend monitoring
+- `docs/operations/local-mac-remote-monitoring.md` - วิธี run dashboard บน Mac และดู remote agents
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
 - `src/app/page.tsx` - Next.js dashboard หน้า command center
 

@@ -53,3 +53,20 @@ export type TeamMetric = {
   helper: string;
   tone: "sky" | "emerald" | "amber" | "rose" | "violet";
 };
+
+export type MonitoringSource = {
+  mode: "mock" | "remote";
+  label: string;
+  detail: string;
+  lastUpdated: string;
+};
+
+export type MonitoringSnapshot = {
+  source: MonitoringSource;
+  agentRuns: AgentRun[];
+  workItems: WorkItem[];
+  agentEvents: AgentEvent[];
+  serviceReadiness: ServiceReadiness[];
+  teamMetrics: TeamMetric[];
+  operatingSteps: string[];
+};

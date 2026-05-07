@@ -1,6 +1,6 @@
 import agentRegistry from "../../blueprints/agent-registry.json";
 import systemBlueprint from "../../blueprints/system-blueprint.json";
-import type { AgentEvent, AgentRun, ServiceReadiness, TeamMetric, WorkItem } from "./monitoring-types";
+import type { AgentEvent, AgentRun, MonitoringSnapshot, ServiceReadiness, TeamMetric, WorkItem } from "./monitoring-types";
 
 const teamByAgent = new Map(
   agentRegistry.teams.flatMap((team) => team.agents.map((agentId) => [agentId, team.name] as const)),
@@ -208,32 +208,40 @@ export const serviceReadiness: ServiceReadiness[] = systemBlueprint.services.map
         : "Clean Architecture skeleton",
 }));
 
-export const teamMetrics: TeamMetric[] = [
-  {
-    label: "Agents Online",
-    value: `${agentRuns.length}/${agentRegistry.agents.length}`,
-    helper: "All roles registered in the OunJai model",
-    tone: "emerald",
-  },
-  {
-    label: "Active Work",
-    value: `${workItems.filter((item) => item.state === "in_progress").length}`,
-    helper: "Tasks currently being executed",
-    tone: "sky",
-  },
-  {
-    label: "Blocked",
-    value: `${workItems.filter((item) => item.state === "blocked").length}`,
-    helper: "Needs Architect or product decision",
-    tone: "rose",
-  },
-  {
-    label: "Avg Health",
-    value: `${Math.round(agentRuns.reduce((sum, agent) => sum + agent.health, 0) / agentRuns.length)}%`,
-    helper: "Signal quality from current run state",
-    tone: "violet",
-  },
-];
+export function buildTeamMetrics(runs: AgentRun[], items: WorkItem[]): TeamMetric[] {
+  const averageHealth = runs.length
+    ? Math.round(runs.reduce((sum, agent) => sum + agent.health, 0) / runs.length)
+    : 0;
+
+  return [
+    {
+      label: "Agents Online",
+      value: `${runs.length}/${agentRegistry.agents.length}`,
+      helper: "All roles registered in the OunJai model",
+      tone: "emerald",
+    },
+    {
+      label: "Active Work",
+      value: `${items.filter((item) => item.state === "in_progress").length}`,
+      helper: "Tasks currently being executed",
+      tone: "sky",
+    },
+    {
+      label: "Blocked",
+      value: `${items.filter((item) => item.state === "blocked").length}`,
+      helper: "Needs Architect or product decision",
+      tone: "rose",
+    },
+    {
+      label: "Avg Health",
+      value: `${averageHealth}%`,
+      helper: "Signal quality from current run state",
+      tone: "violet",
+    },
+  ];
+}
+
+export const teamMetrics: TeamMetric[] = buildTeamMetrics(agentRuns, workItems);
 
 export const operatingSteps = [
   "Intake: convert business goal into Agent Task Brief",
@@ -242,3 +250,20 @@ export const operatingSteps = [
   "Quality: QA validates critical paths and Documentation publishes handoff",
   "Monitor: dashboard tracks health, blockers, task state, events and readiness",
 ];
+
+export function createMockSnapshot(detail = "Set AGENT_RUNTIME_URL to connect this local dashboard to remote agents."): MonitoringSnapshot {
+  return {
+    source: {
+      mode: "mock",
+      label: "Mock workspace data",
+      detail,
+      lastUpdated: new Date().toISOString(),
+    },
+    agentRuns,
+    workItems,
+    agentEvents,
+    serviceReadiness,
+    teamMetrics,
+    operatingSteps,
+  };
+}

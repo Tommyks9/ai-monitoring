@@ -10,15 +10,11 @@ import {
   RadioTower,
   Workflow,
 } from "lucide-react";
-import {
-  agentEvents,
-  agentRuns,
-  operatingSteps,
-  serviceReadiness,
-  teamMetrics,
-  workItems,
-} from "@/lib/monitoring-data";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
+import { getMonitoringSnapshot } from "@/lib/monitoring-source";
 import type { AgentStatus, TaskPriority, TaskState, TeamMetric } from "@/lib/monitoring-types";
+
+export const dynamic = "force-dynamic";
 
 const statusStyles: Record<AgentStatus, string> = {
   working: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
@@ -79,12 +75,22 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const {
+    source,
+    agentRuns,
+    workItems,
+    agentEvents,
+    serviceReadiness,
+    teamMetrics,
+    operatingSteps,
+  } = await getMonitoringSnapshot();
   const blockedItems = workItems.filter((item) => item.state === "blocked");
   const criticalItems = workItems.filter((item) => item.priority === "critical");
 
   return (
     <main className="min-h-screen px-6 py-8 sm:px-10 lg:px-12">
+      <AutoRefresh intervalSeconds={20} />
       <section className="mx-auto max-w-7xl">
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-2xl shadow-sky-950/40">
           <div className="border-b border-white/10 px-6 py-5 sm:px-8">
@@ -92,7 +98,7 @@ export default function Home() {
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-xs font-medium text-sky-100">
                   <RadioTower className="h-3.5 w-3.5" />
-                  Live workspace foundation
+                  {source.mode === "remote" ? "Remote agent runtime connected" : "Local mock workspace"}
                 </div>
                 <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
                   OunJai AI Agent Command Center
@@ -105,10 +111,13 @@ export default function Home() {
               <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                 <div className="flex items-center gap-2 text-white">
                   <LayoutDashboard className="h-4 w-4 text-emerald-300" />
-                  Next action
+                  Data source
                 </div>
                 <p className="mt-2 max-w-xs">
-                  Wire this static monitor to a real agent orchestrator that writes task and event updates.
+                  {source.label}: {source.detail}
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Last refresh: {new Date(source.lastUpdated).toLocaleString("th-TH")}
                 </p>
               </div>
             </div>

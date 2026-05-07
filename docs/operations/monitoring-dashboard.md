@@ -17,6 +17,15 @@
 
 ใช้ `blueprints/monitoring-schema.json` เป็น contract กลางระหว่าง agent runtime กับ dashboard
 
+สำหรับการรัน dashboard บน Mac แล้วดู agents ที่ทำงานบน remote ให้ตั้งค่า:
+
+```bash
+AGENT_RUNTIME_URL=https://your-agent-runtime.example.com
+AGENT_RUNTIME_TOKEN=optional-secret-token
+```
+
+ดูขั้นตอนละเอียดได้ที่ `docs/operations/local-mac-remote-monitoring.md`
+
 agent runtime ควร emit events ต่อไปนี้:
 
 ```text
