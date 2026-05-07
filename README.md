@@ -22,10 +22,31 @@ repo นี้เริ่มวาง foundation สำหรับทีม AI
 ```bash
 npm install
 cp .env.example .env.local
+```
+
+เปิด terminal แรกสำหรับ Agent Runtime:
+
+```bash
+npm run runtime
+```
+
+เปิด terminal ที่สองสำหรับ Dashboard:
+
+```bash
 npm run dev
 ```
 
-เปิดเว็บที่ `http://localhost:3000`
+เปิดเว็บที่:
+
+```text
+http://localhost:3000
+```
+
+Agent Runtime จะอยู่ที่:
+
+```text
+http://localhost:4000
+```
 
 ถ้าต้องการให้ dashboard บน Mac ดู agents ที่รันอยู่บน remote ให้ตั้งค่าใน `.env.local`:
 
@@ -34,7 +55,14 @@ AGENT_RUNTIME_URL=https://your-agent-runtime.example.com
 AGENT_RUNTIME_TOKEN=optional-secret-token
 ```
 
-ถ้าไม่ตั้งค่า dashboard จะใช้ mock data ใน repo และยัง run ได้ปกติ
+ถ้าต้องการใช้ runtime local ที่มาพร้อม repo ให้ใช้ค่า default:
+
+```bash
+AGENT_RUNTIME_URL=http://localhost:4000
+AGENT_RUNTIME_PORT=4000
+```
+
+ถ้าไม่ตั้งค่า `AGENT_RUNTIME_URL` dashboard จะใช้ mock data ใน repo และยัง run ได้ปกติ
 
 ### Validate
 
@@ -54,6 +82,7 @@ npm run build
 - `docs/operations/monitoring-dashboard.md` - data contract และ roadmap สำหรับต่อ orchestrator/backend monitoring
 - `docs/operations/local-mac-remote-monitoring.md` - วิธี run dashboard บน Mac และดู remote agents
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
+- `runtime/agent-runtime.mjs` - local Agent Runtime API สำหรับส่งสถานะ agents/tasks/events ให้ dashboard
 - `src/app/page.tsx` - Next.js dashboard หน้า command center
 
 ### วิธีเริ่มใช้งาน
