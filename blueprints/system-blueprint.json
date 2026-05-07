@@ -23,11 +23,11 @@
       "optimization": "Geospatial Indexing (for Location Tracking)"
     }
   },
-  "tools":{
+  "tools": {
     "services": {
-      "package":"https://www.npmjs.com/package/tmg-b",
-      "description" : "CLI สำหรับสร้าง NestJS + gRPC backend โดยใช้โครงสร้างแบบ clean architecture"
-      "install":"npm i -g tmg-b",
+      "package": "https://www.npmjs.com/package/tmg-b",
+      "description": "CLI สำหรับสร้าง NestJS + gRPC backend โดยใช้โครงสร้างแบบ clean architecture",
+      "install": "npm i -g tmg-b",
       "cli": {
         "relational": "tmg-b g my-service --db typeorm --grpcPort 50051",
         "document": "tmg-b g my-service --db mongoose --grpcPort 50051"
@@ -35,15 +35,15 @@
     },
     "gateways": [
       {
-        "package":"https://www.npmjs.com/package/tmg-gw"
-        "description" : "CLI สำหรับ generate โปรเจกต์ NestJS GraphQL Gateway โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC"
-        "install":"npm i -g tmg-gw",
+        "package": "https://www.npmjs.com/package/tmg-gw",
+        "description": "CLI สำหรับ generate โปรเจกต์ NestJS GraphQL Gateway โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC",
+        "install": "npm i -g tmg-gw",
         "cli": "tmg-gw g my-g-gateway"
       },
       {
-        "package":"https://www.npmjs.com/package/tmg-gw-r"
-        "description" : "CLI สำหรับ generate โปรเจกต์ NestJS RESTful API โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC"
-        "install":"npm i -g tmg-gw-r",
+        "package": "https://www.npmjs.com/package/tmg-gw-r",
+        "description": "CLI สำหรับ generate โปรเจกต์ NestJS RESTful API โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC",
+        "install": "npm i -g tmg-gw-r",
         "cli": "tmg-gw-r g my-r-gateway"
       }
     ]
@@ -74,7 +74,8 @@
       "name": "trip-service",
       "port": 60054,
       "db": "typeorm",
-      "core_logic": "Booking State Machine"
+      "core_logic": "Booking State Machine",
+      "tool": "tmg-b"
     },
     {
       "name": "payment-service",
