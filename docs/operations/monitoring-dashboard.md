@@ -20,8 +20,9 @@
 สำหรับการรัน dashboard บน Mac แล้วดู agents ที่ทำงานบน remote ให้ตั้งค่า:
 
 ```bash
-AGENT_RUNTIME_URL=https://your-agent-runtime.example.com
-AGENT_RUNTIME_TOKEN=optional-secret-token
+AGENT_RUNTIME_URL=http://localhost:4000
+AGENT_RUNTIME_PORT=4000
+AGENT_RUNTIME_TOKEN=
 ```
 
 ดูขั้นตอนละเอียดได้ที่ `docs/operations/local-mac-remote-monitoring.md`
@@ -67,12 +68,15 @@ flowchart LR
 ## Minimal Backend API ที่ควรมี
 
 ```http
+GET /health
 GET /api/agents
 GET /api/work-items
 GET /api/events
 GET /api/services/readiness
+GET /api/snapshot
 POST /api/work-items
 POST /api/agent-runs/:id/events
+POST /api/agent-runs/:id/heartbeat
 PATCH /api/work-items/:id/state
 ```
 

@@ -81,6 +81,25 @@
     }
   },
   "runtime_contract": {
+    "local_runtime": {
+      "script": "npm run runtime",
+      "default_url": "http://localhost:4000",
+      "default_port_env": "AGENT_RUNTIME_PORT",
+      "dashboard_url_env": "AGENT_RUNTIME_URL",
+      "optional_token_env": "AGENT_RUNTIME_TOKEN"
+    },
+    "api_endpoints": [
+      "GET /health",
+      "GET /api/agents",
+      "GET /api/work-items",
+      "GET /api/events",
+      "GET /api/services/readiness",
+      "GET /api/snapshot",
+      "POST /api/work-items",
+      "PATCH /api/work-items/:id/state",
+      "POST /api/agent-runs/:id/events",
+      "POST /api/agent-runs/:id/heartbeat"
+    ],
     "agent_must_emit": [
       "agent_run.started",
       "agent_run.heartbeat",
