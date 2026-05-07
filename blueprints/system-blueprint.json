@@ -1,0 +1,94 @@
+{
+  "project_name": "OunJai",
+  "version": "2.0",
+  "architecture_pattern": "Clean Architecture / Microservices",
+  "base_framework": "NestJS",
+  "shared_library": {
+    "path": "/libs/common",
+    "components": [
+      "grpc-interfaces-proto",
+      "custom-logger-module",
+      "global-exception-filter",
+      "base-repository-patterns",
+      "dto-shared-models"
+    ]
+  },
+  "database_strategy": {
+    "relational": {
+      "provider": "typeorm",
+      "optimization": "Connection Pooling / Transaction Management"
+    },
+    "document": {
+      "provider": "mongoose",
+      "optimization": "Geospatial Indexing (for Location Tracking)"
+    }
+  },
+  "services": [
+    {
+      "name": "identity-service",
+      "port": 60051,
+      "db": "typeorm",
+      "core_logic": "RBAC & JWT"
+    },
+    {
+      "name": "vehicle-service",
+      "port": 60052,
+      "db": "typeorm",
+      "core_logic": "Vehicle Registry"
+    },
+    {
+      "name": "location-service",
+      "port": 60053,
+      "db": "mongoose",
+      "core_logic": "2dsphere Spatial Indexing"
+    },
+    {
+      "name": "trip-service",
+      "port": 60054,
+      "db": "typeorm",
+      "core_logic": "Booking State Machine"
+    },
+    {
+      "name": "payment-service",
+      "port": 60055,
+      "db": "typeorm",
+      "core_logic": "Transaction Outbox Pattern"
+    },
+    {
+      "name": "promotion-service",
+      "port": 60056,
+      "db": "mongoose",
+      "core_logic": "Coupon Engine"
+    },
+    {
+      "name": "notification-service",
+      "port": 60057,
+      "db": "mongoose",
+      "core_logic": "Pub/Sub Messaging"
+    },
+    {
+      "name": "support-service",
+      "port": 60058,
+      "db": "mongoose",
+      "core_logic": "Ticket Management"
+    },
+    {
+      "name": "communication-service",
+      "port": 60059,
+      "db": "mongoose",
+      "core_logic": "Redis Adapter / Socket.io"
+    }
+  ],
+  "gateways": [
+    {
+      "name": "admin-gateway",
+      "type": "GraphQL",
+      "tool": "tmg-gw"
+    },
+    {
+      "name": "mobile-gateway",
+      "type": "RESTful",
+      "tool": "tmg-gw-r"
+    }
+  ]
+}
