@@ -23,24 +23,52 @@
       "optimization": "Geospatial Indexing (for Location Tracking)"
     }
   },
+  "tools":{
+    "services": {
+      "package":"https://www.npmjs.com/package/tmg-b",
+      "description" : "CLI สำหรับสร้าง NestJS + gRPC backend โดยใช้โครงสร้างแบบ clean architecture"
+      "install":"npm i -g tmg-b",
+      "cli": {
+        "relational": "tmg-b g my-service --db typeorm --grpcPort 50051",
+        "document": "tmg-b g my-service --db mongoose --grpcPort 50051"
+      }
+    },
+    "gateways": [
+      {
+        "package":"https://www.npmjs.com/package/tmg-gw"
+        "description" : "CLI สำหรับ generate โปรเจกต์ NestJS GraphQL Gateway โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC"
+        "install":"npm i -g tmg-gw",
+        "cli": "tmg-gw g my-g-gateway"
+      },
+      {
+        "package":"https://www.npmjs.com/package/tmg-gw-r"
+        "description" : "CLI สำหรับ generate โปรเจกต์ NestJS RESTful API โดยใช้แนวทาง Clean Architecture และเชื่อมต่อ service ภายในผ่าน gRPC"
+        "install":"npm i -g tmg-gw-r",
+        "cli": "tmg-gw-r g my-r-gateway"
+      }
+    ]
+  },
   "services": [
     {
       "name": "identity-service",
       "port": 60051,
       "db": "typeorm",
-      "core_logic": "RBAC & JWT"
+      "core_logic": "RBAC & JWT",
+      "tool": "tmg-b"
     },
     {
       "name": "vehicle-service",
       "port": 60052,
       "db": "typeorm",
-      "core_logic": "Vehicle Registry"
+      "core_logic": "Vehicle Registry",
+      "tool": "tmg-b"
     },
     {
       "name": "location-service",
       "port": 60053,
       "db": "mongoose",
-      "core_logic": "2dsphere Spatial Indexing"
+      "core_logic": "2dsphere Spatial Indexing",
+      "tool": "tmg-b"
     },
     {
       "name": "trip-service",
@@ -52,31 +80,36 @@
       "name": "payment-service",
       "port": 60055,
       "db": "typeorm",
-      "core_logic": "Transaction Outbox Pattern"
+      "core_logic": "Transaction Outbox Pattern",
+      "tool": "tmg-b"
     },
     {
       "name": "promotion-service",
       "port": 60056,
       "db": "mongoose",
-      "core_logic": "Coupon Engine"
+      "core_logic": "Coupon Engine",
+      "tool": "tmg-b"
     },
     {
       "name": "notification-service",
       "port": 60057,
       "db": "mongoose",
-      "core_logic": "Pub/Sub Messaging"
+      "core_logic": "Pub/Sub Messaging",
+      "tool": "tmg-b"
     },
     {
       "name": "support-service",
       "port": 60058,
       "db": "mongoose",
-      "core_logic": "Ticket Management"
+      "core_logic": "Ticket Management",
+      "tool": "tmg-b"
     },
     {
       "name": "communication-service",
       "port": 60059,
       "db": "mongoose",
-      "core_logic": "Redis Adapter / Socket.io"
+      "core_logic": "Redis Adapter / Socket.io",
+      "tool": "tmg-b"
     }
   ],
   "gateways": [
