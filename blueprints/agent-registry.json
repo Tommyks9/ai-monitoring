@@ -1,0 +1,201 @@
+{
+  "model_name": "OunJai AI Software House",
+  "version": "1.0",
+  "language": "th-TH",
+  "mission": "สร้างทีม AI Agents สำหรับออกแบบ พัฒนา ตรวจสอบ และจัดทำเอกสารระบบ OunJai ระดับ production-grade",
+  "source_of_truth": {
+    "system_blueprint": "blueprints/system-blueprint.json",
+    "operating_model": "docs/operations/agent-operating-model.md",
+    "agent_prompts": "docs/agents/README.md"
+  },
+  "global_rules": [
+    "ยึด system-blueprint.json เป็น master source เสมอ",
+    "ทุก service ต้องแยก Domain, Data, Infrastructure, Presentation ตาม Clean Architecture",
+    "โค้ดพื้นฐานซ้ำ เช่น DTO, logger, exception, proto, repository base ต้องอยู่ใน /libs/common",
+    "งานที่กระทบ payment, trip, identity และ location ต้องมี test และ migration/index plan",
+    "ทุก agent ต้องส่งมอบ handoff note พร้อมไฟล์ที่แก้, risk, test result และ next action"
+  ],
+  "teams": [
+    {
+      "name": "Strategy & Blueprint",
+      "agents": [
+        "architect-agent",
+        "shared-lib-agent"
+      ],
+      "responsibility": "ออกแบบภาพรวมระบบ, contract กลาง, architecture decision และขอบเขต shared library"
+    },
+    {
+      "name": "Development Backend",
+      "agents": [
+        "lead-developer-agent",
+        "database-engineer-agent"
+      ],
+      "responsibility": "สร้าง microservices ด้วย CLI, ออกแบบ persistence, transaction, indexing และ integration ระหว่าง service"
+    },
+    {
+      "name": "Development Frontend",
+      "agents": [
+        "frontend-agent"
+      ],
+      "responsibility": "สร้าง mobile app, driver/customer flows และ admin dashboard โดยผูกกับ gateway contract"
+    },
+    {
+      "name": "Quality & Docs",
+      "agents": [
+        "qa-automation-agent",
+        "documentation-agent"
+      ],
+      "responsibility": "ตรวจคุณภาพ, test automation, API documentation, README และ sequence diagram"
+    }
+  ],
+  "agents": [
+    {
+      "id": "architect-agent",
+      "name": "Architect & Blueprint Agent",
+      "primary_inputs": [
+        "blueprints/system-blueprint.json",
+        "business requirements",
+        "architecture decisions"
+      ],
+      "primary_outputs": [
+        "ADR",
+        "service boundaries",
+        "contract review",
+        "risk register"
+      ],
+      "approval_gates": [
+        "service boundary ชัดเจน",
+        "contract ไม่ซ้ำซ้อน",
+        "มี migration และ rollout strategy สำหรับ breaking changes"
+      ]
+    },
+    {
+      "id": "shared-lib-agent",
+      "name": "Shared Lib Agent",
+      "primary_inputs": [
+        "existing services",
+        "proto definitions",
+        "common DTO candidates"
+      ],
+      "primary_outputs": [
+        "/libs/common",
+        "shared proto",
+        "logger module",
+        "global exception filter",
+        "base repository patterns"
+      ],
+      "approval_gates": [
+        "ไม่มี duplicated infrastructure code ระหว่าง services",
+        "common contracts versioned ได้",
+        "breaking changes มี migration note"
+      ]
+    },
+    {
+      "id": "database-engineer-agent",
+      "name": "Database Engineer Agent",
+      "primary_inputs": [
+        "domain models",
+        "query patterns",
+        "traffic assumptions",
+        "consistency requirements"
+      ],
+      "primary_outputs": [
+        "TypeORM entities",
+        "Mongoose schemas",
+        "indexes",
+        "migration plan",
+        "transaction/outbox/saga design"
+      ],
+      "approval_gates": [
+        "location-service มี 2dsphere index",
+        "trip/payment มี consistency strategy",
+        "critical queries มี index coverage"
+      ]
+    },
+    {
+      "id": "lead-developer-agent",
+      "name": "Lead Developer Agent",
+      "primary_inputs": [
+        "blueprints/system-blueprint.json",
+        "CLI tmg-b",
+        "shared library contracts"
+      ],
+      "primary_outputs": [
+        "NestJS service skeletons",
+        "Clean Architecture modules",
+        "gRPC controllers",
+        "application use cases"
+      ],
+      "approval_gates": [
+        "ports ตรงกับ blueprint",
+        "ทุก service มี 4 layers",
+        "ไม่มี business logic ใน controller"
+      ]
+    },
+    {
+      "id": "frontend-agent",
+      "name": "Mobile & Web Frontend Agent",
+      "primary_inputs": [
+        "gateway OpenAPI/GraphQL schema",
+        "UX flow",
+        "design system",
+        "auth/session contract"
+      ],
+      "primary_outputs": [
+        "React Native driver/customer app",
+        "Next.js admin dashboard",
+        "typed API client",
+        "UI state and error handling"
+      ],
+      "approval_gates": [
+        "critical flows มี loading/error/empty states",
+        "API types generate จาก contract",
+        "accessibility และ responsive behavior ผ่าน checklist"
+      ]
+    },
+    {
+      "id": "documentation-agent",
+      "name": "Documentation Agent",
+      "primary_inputs": [
+        "source code",
+        ".proto files",
+        "gateway routes",
+        "test examples"
+      ],
+      "primary_outputs": [
+        "service README",
+        "Swagger/OpenAPI",
+        "Postman collection",
+        "sequence diagrams",
+        "runbooks"
+      ],
+      "approval_gates": [
+        "เอกสารตรงกับ code ล่าสุด",
+        "ทุก service มี README",
+        "gateway มีตัวอย่าง request/response"
+      ]
+    },
+    {
+      "id": "qa-automation-agent",
+      "name": "QA Automation Agent",
+      "primary_inputs": [
+        "acceptance criteria",
+        "business rules",
+        "critical path",
+        "risk register"
+      ],
+      "primary_outputs": [
+        "unit tests",
+        "integration tests",
+        "contract tests",
+        "regression checklist",
+        "test report"
+      ],
+      "approval_gates": [
+        "payment/trip critical path covered",
+        "contract mismatch ถูกจับได้ใน test",
+        "CI test command ระบุชัดเจน"
+      ]
+    }
+  ]
+}
