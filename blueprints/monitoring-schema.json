@@ -1,0 +1,102 @@
+{
+  "name": "OunJai Agent Monitoring Schema",
+  "version": "1.0",
+  "purpose": "กำหนดรูปแบบข้อมูลกลางสำหรับ monitor การทำงานของ AI Agents, task queue, handoff events และ service readiness",
+  "entities": {
+    "agent_run": {
+      "required_fields": [
+        "id",
+        "agent_id",
+        "team",
+        "status",
+        "current_task",
+        "health",
+        "progress",
+        "queue_depth",
+        "last_signal",
+        "risk"
+      ],
+      "status_values": [
+        "working",
+        "review",
+        "idle",
+        "blocked"
+      ],
+      "health_range": "0-100",
+      "progress_range": "0-100"
+    },
+    "work_item": {
+      "required_fields": [
+        "id",
+        "title",
+        "owner",
+        "priority",
+        "state",
+        "service",
+        "acceptance_gate",
+        "updated_at"
+      ],
+      "priority_values": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "state_values": [
+        "queued",
+        "in_progress",
+        "review",
+        "blocked",
+        "done"
+      ]
+    },
+    "agent_event": {
+      "required_fields": [
+        "id",
+        "time",
+        "agent",
+        "type",
+        "message"
+      ],
+      "type_values": [
+        "handoff",
+        "decision",
+        "test",
+        "blocker",
+        "deploy"
+      ]
+    },
+    "service_readiness": {
+      "source": "blueprints/system-blueprint.json.services",
+      "required_fields": [
+        "name",
+        "port",
+        "database",
+        "core_logic",
+        "owner",
+        "readiness",
+        "next_gate"
+      ],
+      "readiness_range": "0-100"
+    }
+  },
+  "runtime_contract": {
+    "agent_must_emit": [
+      "agent_run.started",
+      "agent_run.heartbeat",
+      "work_item.state_changed",
+      "agent_event.created",
+      "handoff.created",
+      "agent_run.completed",
+      "agent_run.failed"
+    ],
+    "monitor_must_display": [
+      "team metrics",
+      "agent health",
+      "blocked work",
+      "task queue",
+      "event stream",
+      "service readiness"
+    ]
+  }
+}

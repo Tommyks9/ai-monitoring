@@ -7,13 +7,43 @@
 
 repo นี้เริ่มวาง foundation สำหรับทีม AI Agents แบบ Software House ระดับ high-end ตาม OunJai Model โดยมี source of truth และ operating model ให้ agent หลายตัวทำงานร่วมกันได้อย่างเป็นระบบ
 
+## Monitoring Dashboard
+
+โปรเจกต์นี้มี Next.js dashboard สำหรับ monitor ทีม AI Agents แล้ว โดยแสดงภาพรวม:
+
+- health/progress ของ agent แต่ละตัว
+- active task board และ blocker
+- handoff/event stream
+- service readiness จาก `system-blueprint.json`
+- control loop ว่างานควรไหลจาก business goal ไปหา agent และ quality gate อย่างไร
+
+### Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+เปิดเว็บที่ `http://localhost:3000`
+
+### Validate
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
 ### ไฟล์สำคัญ
 
 - `blueprints/system-blueprint.json` - master blueprint ของ OunJai microservices, ports, database strategy และ gateways
 - `blueprints/agent-registry.json` - registry ของทีม/agent, responsibility, input/output และ approval gates
+- `blueprints/monitoring-schema.json` - schema กลางสำหรับ agent run, work item, event stream และ service readiness
 - `docs/agents/README.md` - prompt pack ภาษาไทยสำหรับ Architect, Shared Lib, Database, Lead Dev, Frontend, Documentation และ QA agents
 - `docs/operations/agent-operating-model.md` - workflow, handoff, quality gates และลำดับการทำงานของทีม
+- `docs/operations/monitoring-dashboard.md` - data contract และ roadmap สำหรับต่อ orchestrator/backend monitoring
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
+- `src/app/page.tsx` - Next.js dashboard หน้า command center
 
 ### วิธีเริ่มใช้งาน
 
@@ -22,6 +52,7 @@ repo นี้เริ่มวาง foundation สำหรับทีม AI
 3. copy `docs/templates/agent-task-brief.md` แล้วเติม goal, scope และ acceptance criteria
 4. ให้ agent ทำงานตาม `docs/operations/agent-operating-model.md`
 5. ปิดงานด้วย handoff note, validation result และ next actions
+6. monitor สถานะทีมผ่าน dashboard และอัปเดต event ตาม `blueprints/monitoring-schema.json`
 
 ### ทีม AI Agents
 

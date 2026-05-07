@@ -1,0 +1,48 @@
+{
+  "name": "ai-monitoring",
+  "version": "1.0.0",
+  "description": "สำหรับทำ AI Agent Monitoring และ GUI ผ่าน Web App \"Next.js (React) Tailwind CSS + shadcn/ui\" หรือจะพูดให้ถูกก็คือ Virtual Workspace for AI Agents",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tommyks9/ai-monitoring.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tommyks9/ai-monitoring/issues"
+  },
+  "homepage": "https://github.com/Tommyks9/ai-monitoring#readme",
+  "overrides": {
+    "next": {
+      "postcss": "^8.5.14"
+    }
+  },
+  "dependencies": {
+    "lucide-react": "^1.14.0",
+    "next": "^16.2.5",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.5",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3"
+  }
+}
