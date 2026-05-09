@@ -4,6 +4,8 @@
 
 repo นี้มี runtime local ให้แล้วที่ `runtime/agent-runtime.mjs` สำหรับเริ่มต้น monitor ได้ทันที
 
+หน้า dashboard และข้อความจาก agents ถูกตั้งเป็นภาษาไทยก่อนเสมอ เพื่อให้ owner อ่าน progress, blocker และ handoff ได้ทันที
+
 ## 1. Clone และตั้งค่า env
 
 ```bash

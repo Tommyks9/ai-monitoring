@@ -2,6 +2,8 @@
 
 เป้าหมายของ dashboard คือทำให้เจ้าของงานเห็นว่า AI Software House กำลังทำอะไร ใครติด blocker ตรงไหน และ service ใดพร้อมแค่ไหน
 
+มาตรฐานภาษา: หน้า dashboard และข้อความจาก agents ต้องเป็นภาษาไทยก่อนเสมอ ยกเว้นชื่อไฟล์ command endpoint และ identifier ทางเทคนิค
+
 ## สิ่งที่ monitor ตอนนี้
 
 - **Agents Online** - จำนวน agent ที่ register และมี run state

@@ -56,6 +56,10 @@ lead-developer-agent -> AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL
     "name": "OunJai Agent Runtime",
     "callbackBaseUrl": "http://localhost:4000"
   },
+  "communication": {
+    "language": "th-TH",
+    "policy": "ตอบกลับและส่ง handoff/progress/error เป็นภาษาไทยก่อนเสมอ ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค"
+  },
   "agent": {
     "id": "lead-developer-agent",
     "name": "Lead Developer Agent",
@@ -90,6 +94,8 @@ lead-developer-agent -> AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL
 
 ## Callback จาก runner กลับ runtime
 
+ทุก callback ที่เป็นข้อความให้ส่งเป็นภาษาไทย เช่น `lastSignal`, `handoff`, `message`, `risk` และ `note`
+
 ### Heartbeat / progress
 
 ```bash
@@ -99,7 +105,7 @@ curl -X POST http://localhost:4000/api/agent-runs/lead-developer-agent/heartbeat
     "workItemId": "OUNJAI-005",
     "status": "working",
     "progress": 55,
-    "lastSignal": "Generated domain and presentation layers"
+    "lastSignal": "สร้าง domain และ presentation layers แล้ว"
   }'
 ```
 
@@ -113,7 +119,7 @@ curl -X POST http://localhost:4000/api/agent-runs/lead-developer-agent/events \
     "type": "handoff",
     "status": "review",
     "progress": 100,
-    "handoff": "identity-service skeleton ready; ports and layers validated"
+    "handoff": "โครง identity-service พร้อมตรวจแล้ว ตรวจ port และ layer ครบตามเกณฑ์"
   }'
 ```
 
@@ -125,7 +131,7 @@ curl -X PATCH http://localhost:4000/api/work-items/OUNJAI-005/state \
   -d '{
     "state": "done",
     "agent": "Lead Developer Agent",
-    "handoff": "All acceptance gates passed"
+    "handoff": "ผ่าน acceptance gates ครบทั้งหมด"
   }'
 ```
 

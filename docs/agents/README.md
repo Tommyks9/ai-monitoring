@@ -22,6 +22,8 @@
 ```text
 คุณกำลังทำงานในโปรเจกต์ OunJai ระบบ Microservices บน NestJS ตาม Clean Architecture
 ให้ยึด blueprints/system-blueprint.json เป็น master source ทุกครั้ง
+ให้สื่อสารกับ owner เป็นภาษาไทยก่อนเสมอ ทั้ง progress, blocker, handoff, risk และ recommendation
+ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิคที่ควรคงตามจริง
 ห้ามแก้ port, service name, database strategy หรือ shared library path โดยไม่มีเหตุผลและบันทึกไว้ใน ADR
 ทุก service ต้องแยก 4 layer: Domain, Data, Infrastructure, Presentation
 สิ่งที่ซ้ำกันระหว่าง service ต้องย้ายไป /libs/common

@@ -39,6 +39,44 @@ const priorityStyles: Record<TaskPriority, string> = {
   low: "text-slate-200",
 };
 
+const statusLabels: Record<AgentStatus, string> = {
+  working: "กำลังทำงาน",
+  review: "รอตรวจ",
+  idle: "ว่าง",
+  blocked: "ติดขัด",
+};
+
+const taskStateLabels: Record<TaskState, string> = {
+  queued: "รอคิว",
+  in_progress: "กำลังทำ",
+  review: "รอตรวจ",
+  blocked: "ติดขัด",
+  done: "เสร็จแล้ว",
+};
+
+const priorityLabels: Record<TaskPriority, string> = {
+  critical: "วิกฤต",
+  high: "สูง",
+  medium: "กลาง",
+  low: "ต่ำ",
+};
+
+const dispatchStatusLabels: Record<string, string> = {
+  waiting: "รอจัดงาน",
+  assigned: "มอบหมายแล้ว",
+  sent_to_agent: "ส่งให้ agent แล้ว",
+  running: "กำลังรัน",
+  review: "รอตรวจ",
+  completed: "เสร็จสมบูรณ์",
+  blocked: "ติดขัด",
+};
+
+const dispatchModeLabels: Record<string, string> = {
+  local: "จำลองในเครื่อง",
+  webhook: "ส่งไป runner จริง",
+  hybrid: "ผสม",
+};
+
 const metricStyles: Record<TeamMetric["tone"], string> = {
   sky: "from-sky-500/30 to-cyan-500/10 ring-sky-400/20",
   emerald: "from-emerald-500/30 to-teal-500/10 ring-emerald-400/20",
@@ -89,7 +127,7 @@ export default async function Home() {
   const blockedItems = workItems.filter((item) => item.state === "blocked");
   const criticalItems = workItems.filter((item) => item.priority === "critical");
   const ownerOptions = agentRuns.map((agent) => agent.agentName);
-  const serviceOptions = ["all services", "/libs/common", ...serviceReadiness.map((service) => service.name)];
+  const serviceOptions = ["ทุก service", "/libs/common", ...serviceReadiness.map((service) => service.name)];
 
   return (
     <main className="min-h-screen px-6 py-8 sm:px-10 lg:px-12">
@@ -101,26 +139,25 @@ export default async function Home() {
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-xs font-medium text-sky-100">
                   <RadioTower className="h-3.5 w-3.5" />
-                  {source.mode === "remote" ? "Remote agent runtime connected" : "Local mock workspace"}
+                  {source.mode === "remote" ? "เชื่อมต่อ Agent Runtime แล้ว" : "กำลังใช้ข้อมูลจำลองในเครื่อง"}
                 </div>
                 <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-                  OunJai AI Agent Command Center
+                  ศูนย์ควบคุมทีม AI Agents อุ่นใจ
                 </h1>
                 <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
-                  Monitor team health, task ownership, blockers, event handoffs and service readiness for the
-                  OunJai AI Software House from one dashboard.
+                  ติดตามสุขภาพทีม งานที่แต่ละ agent รับผิดชอบ งานติดขัด การส่งมอบงาน และความพร้อมของ service ทั้งหมดจากหน้าเดียว
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                 <div className="flex items-center gap-2 text-white">
                   <LayoutDashboard className="h-4 w-4 text-emerald-300" />
-                  Data source
+                  แหล่งข้อมูล
                 </div>
                 <p className="mt-2 max-w-xs">
                   {source.label}: {source.detail}
                 </p>
                 <p className="mt-2 text-xs text-slate-500">
-                  Last refresh: {new Date(source.lastUpdated).toLocaleString("th-TH")}
+                  อัปเดตล่าสุด: {new Date(source.lastUpdated).toLocaleString("th-TH")}
                 </p>
               </div>
             </div>
@@ -143,9 +180,9 @@ export default async function Home() {
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
             <SectionHeader
-              eyebrow="Team monitor"
-              title="Agent runs"
-              description="Each card represents one AI role from the registry with current task, health, progress and risk signal."
+              eyebrow="ภาพรวมทีม"
+              title="สถานะการทำงานของ Agents"
+              description="แต่ละการ์ดแสดง agent จาก registry พร้อมงานปัจจุบัน สุขภาพ ความคืบหน้า และความเสี่ยงที่ต้องดูแล"
             />
             <div className="mt-6 grid gap-4 xl:grid-cols-2">
               {agentRuns.map((agent) => (
@@ -159,21 +196,21 @@ export default async function Home() {
                       <p className="mt-1 text-xs text-slate-400">{agent.team}</p>
                     </div>
                     <span className={`rounded-full border px-3 py-1 text-xs ${statusStyles[agent.status]}`}>
-                      {agent.status.replace("_", " ")}
+                      {statusLabels[agent.status]}
                     </span>
                   </div>
                   <p className="mt-4 text-sm leading-6 text-slate-200">{agent.currentTask}</p>
                   <div className="mt-5 grid grid-cols-3 gap-3 text-xs text-slate-300">
                     <div className="rounded-2xl bg-white/5 p-3">
-                      <p className="text-slate-500">Health</p>
+                      <p className="text-slate-500">สุขภาพ</p>
                       <p className="mt-1 text-lg font-semibold text-white">{agent.health}%</p>
                     </div>
                     <div className="rounded-2xl bg-white/5 p-3">
-                      <p className="text-slate-500">Queue</p>
+                      <p className="text-slate-500">คิว</p>
                       <p className="mt-1 text-lg font-semibold text-white">{agent.queueDepth}</p>
                     </div>
                     <div className="rounded-2xl bg-white/5 p-3">
-                      <p className="text-slate-500">Progress</p>
+                      <p className="text-slate-500">คืบหน้า</p>
                       <p className="mt-1 text-lg font-semibold text-white">{agent.progress}%</p>
                     </div>
                   </div>
@@ -182,10 +219,10 @@ export default async function Home() {
                   </div>
                   <div className="mt-4 rounded-2xl bg-white/5 p-3 text-xs leading-5 text-slate-300">
                     <p>
-                      <span className="text-emerald-200">Signal:</span> {agent.lastSignal}
+                      <span className="text-emerald-200">สัญญาณ:</span> {agent.lastSignal}
                     </p>
                     <p className="mt-1">
-                      <span className="text-amber-200">Risk:</span> {agent.risk}
+                      <span className="text-amber-200">ความเสี่ยง:</span> {agent.risk}
                     </p>
                   </div>
                 </article>
@@ -196,9 +233,9 @@ export default async function Home() {
           <aside className="space-y-8">
             <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6">
               <SectionHeader
-                eyebrow="Control loop"
-                title="How work moves"
-                description="The operating model turns business goals into monitored agent execution."
+                eyebrow="วงจรควบคุมงาน"
+                title="งานไหลผ่านทีมอย่างไร"
+                description="รูปแบบการทำงานจะแปลงเป้าหมายธุรกิจให้กลายเป็นงานที่ agent รับไปทำและติดตามได้"
               />
               <ol className="mt-6 space-y-4">
                 {operatingSteps.map((step, index) => (
@@ -215,7 +252,7 @@ export default async function Home() {
             <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6">
               <div className="flex items-center gap-2 text-white">
                 <AlertTriangle className="h-5 w-5 text-rose-300" />
-                <h2 className="text-xl font-semibold">Blockers</h2>
+                <h2 className="text-xl font-semibold">งานติดขัด</h2>
               </div>
               <div className="mt-5 space-y-3">
                 {blockedItems.map((item) => (
@@ -231,9 +268,9 @@ export default async function Home() {
 
         <section className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
           <SectionHeader
-            eyebrow="Execution queue"
-            title="Active task board"
-            description="Use this view to see which agent owns each work item, what gate must pass, and how the dispatcher is moving work through the agent lifecycle."
+            eyebrow="คิวปฏิบัติงาน"
+            title="บอร์ดงานที่กำลังเดิน"
+            description="ดูว่า agent ตัวไหนถือครองงานใด ต้องผ่าน gate อะไร และ dispatcher กำลังพางานผ่าน lifecycle ขั้นไหน"
           />
           <TaskCreator
             owners={ownerOptions}
@@ -243,12 +280,12 @@ export default async function Home() {
           />
           <div className="mt-6 overflow-hidden rounded-3xl border border-white/10">
             <div className="grid grid-cols-12 gap-4 border-b border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              <span className="col-span-2">Task</span>
-              <span className="col-span-3">Title</span>
-              <span className="col-span-2">Owner</span>
-              <span className="col-span-2">Gate</span>
-              <span className="col-span-1">Priority</span>
-              <span className="col-span-2">State</span>
+              <span className="col-span-2">รหัสงาน</span>
+              <span className="col-span-3">ชื่องาน</span>
+              <span className="col-span-2">ผู้รับผิดชอบ</span>
+              <span className="col-span-2">เกณฑ์ผ่านงาน</span>
+              <span className="col-span-1">ความสำคัญ</span>
+              <span className="col-span-2">สถานะ</span>
             </div>
             {workItems.map((item) => (
               <div
@@ -261,7 +298,7 @@ export default async function Home() {
                   {typeof item.progress === "number" ? (
                     <span className="mt-2 block">
                       <ProgressBar value={item.progress} />
-                      <span className="mt-1 block text-xs text-slate-500">{item.progress}% dispatch progress</span>
+                      <span className="mt-1 block text-xs text-slate-500">ความคืบหน้า dispatch {item.progress}%</span>
                     </span>
                   ) : null}
                 </span>
@@ -271,33 +308,38 @@ export default async function Home() {
                   {item.lastSignal ? <span className="mt-1 block text-sky-200/80">{item.lastSignal}</span> : null}
                   {item.handoff ? <span className="mt-1 block text-emerald-200/80">{item.handoff}</span> : null}
                 </span>
-                <span className={`col-span-1 font-medium ${priorityStyles[item.priority]}`}>{item.priority}</span>
+                <span className={`col-span-1 font-medium ${priorityStyles[item.priority]}`}>
+                  {priorityLabels[item.priority]}
+                </span>
                 <span className="col-span-2">
                   <span className={`rounded-full px-3 py-1 text-xs ${taskStateStyles[item.state]}`}>
-                    {item.state.replace("_", " ")}
+                    {taskStateLabels[item.state]}
                   </span>
                   {item.dispatchStatus ? (
-                    <span className="mt-2 block text-xs text-slate-500">dispatch: {item.dispatchStatus}</span>
+                    <span className="mt-2 block text-xs text-slate-500">
+                      dispatch: {dispatchStatusLabels[item.dispatchStatus] ?? item.dispatchStatus}
+                    </span>
                   ) : null}
                   {item.dispatchMode ? (
-                    <span className="mt-1 block text-xs text-slate-500">mode: {item.dispatchMode}</span>
+                    <span className="mt-1 block text-xs text-slate-500">
+                      โหมด: {dispatchModeLabels[item.dispatchMode] ?? item.dispatchMode}
+                    </span>
                   ) : null}
                 </span>
               </div>
             ))}
           </div>
           <p className="mt-4 text-sm text-slate-400">
-            Critical tasks waiting now: {criticalItems.length}. Runtime dispatcher assigns queued work, emits
-            heartbeat signals, sends external webhook jobs when configured, and completes tasks after review.
+            งานระดับวิกฤตตอนนี้: {criticalItems.length} งาน ระบบ dispatcher จะมอบหมายงาน ส่ง heartbeat ส่งงานไป webhook runner หากตั้งค่าไว้ และปิดงานหลังผ่าน review
           </p>
         </section>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1.2fr]">
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
             <SectionHeader
-              eyebrow="Event stream"
-              title="Latest handoffs"
-              description="Events are the monitoring backbone: decisions, blockers, tests and handoff notes."
+              eyebrow="เหตุการณ์ล่าสุด"
+              title="Handoff และสัญญาณจากทีม"
+            description="สตรีมเหตุการณ์คือแกนหลักของ monitoring: decision, blocker, test และ handoff note"
             />
             <div className="mt-6 space-y-4">
               {agentEvents.map((event) => (
@@ -328,9 +370,9 @@ export default async function Home() {
 
           <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
             <SectionHeader
-              eyebrow="Blueprint readiness"
-              title="Microservice build map"
-              description="Service readiness is tied directly to system-blueprint.json so the monitor stays aligned with the master source."
+              eyebrow="ความพร้อมตาม Blueprint"
+              title="แผนที่การสร้าง Microservices"
+              description="ความพร้อมของ service อ้างอิงจาก system-blueprint.json เพื่อให้ monitor ตรงกับ master source เสมอ"
             />
             <div className="mt-6 grid gap-3">
               {serviceReadiness.map((service) => (
@@ -346,18 +388,18 @@ export default async function Home() {
                         <h3 className="font-semibold text-white">{service.name}</h3>
                       </div>
                       <p className="mt-1 text-xs text-slate-400">
-                        port {service.port} / {service.database} / {service.coreLogic}
+                        พอร์ต {service.port} / {service.database} / {service.coreLogic}
                       </p>
                     </div>
                     <div className="text-right text-sm text-slate-300">
-                      <p className="text-white">{service.readiness}% ready</p>
+                      <p className="text-white">พร้อม {service.readiness}%</p>
                       <p className="text-xs text-slate-400">{service.owner}</p>
                     </div>
                   </div>
                   <div className="mt-4">
                     <ProgressBar value={service.readiness} />
                   </div>
-                  <p className="mt-3 text-xs text-slate-400">Next gate: {service.nextGate}</p>
+                  <p className="mt-3 text-xs text-slate-400">gate ถัดไป: {service.nextGate}</p>
                 </article>
               ))}
             </div>

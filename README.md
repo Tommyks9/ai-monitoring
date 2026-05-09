@@ -17,6 +17,8 @@ repo นี้เริ่มวาง foundation สำหรับทีม AI
 - service readiness จาก `system-blueprint.json`
 - control loop ว่างานควรไหลจาก business goal ไปหา agent และ quality gate อย่างไร
 
+หน้า monitor และข้อความที่ agents ส่งกลับ owner ถูกตั้งเป็น **Thai-first**: progress, blocker, handoff, risk และ recommendation จะเป็นภาษาไทย ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค
+
 ### Run locally
 
 ```bash

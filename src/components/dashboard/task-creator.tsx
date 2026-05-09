@@ -16,6 +16,13 @@ type SubmitState =
 
 const priorities: TaskPriority[] = ["critical", "high", "medium", "low"];
 
+const priorityLabels: Record<TaskPriority, string> = {
+  critical: "วิกฤต",
+  high: "สูง",
+  medium: "กลาง",
+  low: "ต่ำ",
+};
+
 export function TaskCreator({
   owners,
   services,
@@ -30,14 +37,14 @@ export function TaskCreator({
   const [title, setTitle] = useState("");
   const [owner, setOwner] = useState(owners[0] ?? "");
   const [priority, setPriority] = useState<TaskPriority>("high");
-  const [service, setService] = useState(services[0] ?? "all services");
+  const [service, setService] = useState(services[0] ?? "ทุก service");
   const [acceptanceGate, setAcceptanceGate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>({
     kind: "idle",
     message: runtimeConnected
-      ? "Create a task and it will appear in the runtime queue."
-      : "Start npm run runtime and set AGENT_RUNTIME_URL to create live tasks.",
+      ? "สร้างงานแล้วระบบจะส่งเข้าคิวของ runtime ทันที"
+      : "เริ่ม npm run runtime และตั้ง AGENT_RUNTIME_URL ก่อนสร้างงานจริง",
   });
 
   const canSubmit = useMemo(
@@ -48,7 +55,7 @@ export function TaskCreator({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
-    setSubmitState({ kind: "idle", message: "Sending task to Agent Runtime..." });
+    setSubmitState({ kind: "idle", message: "กำลังส่งงานไปยัง Agent Runtime..." });
 
     try {
       const response = await fetch("/api/runtime/work-items", {
@@ -61,24 +68,24 @@ export function TaskCreator({
           owner,
           priority,
           service,
-          acceptanceGate: acceptanceGate.trim() || "Acceptance gate pending",
+          acceptanceGate: acceptanceGate.trim() || "รอระบุเกณฑ์ผ่านงาน",
         }),
       });
       const data = (await response.json()) as { id?: string; error?: string };
 
       if (!response.ok) {
-        throw new Error(data.error ?? `Runtime returned ${response.status}`);
+        throw new Error(data.error ?? `Runtime ตอบกลับด้วยสถานะ ${response.status}`);
       }
 
       setTitle("");
       setAcceptanceGate("");
       setSubmitState({
         kind: "success",
-        message: `Created ${data.id ?? "new work item"}. Refreshing dashboard...`,
+        message: `สร้างงาน ${data.id ?? "ใหม่"} แล้ว กำลังรีเฟรชแดชบอร์ด...`,
       });
       window.setTimeout(() => window.location.reload(), 700);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to create work item";
+      const message = error instanceof Error ? error.message : "สร้างงานไม่สำเร็จ";
       setSubmitState({ kind: "error", message });
     } finally {
       setIsSubmitting(false);
@@ -91,10 +98,10 @@ export function TaskCreator({
         <div>
           <div className="flex items-center gap-2 text-white">
             <Send className="h-4 w-4 text-sky-200" />
-            <h3 className="font-semibold">Create work item</h3>
+            <h3 className="font-semibold">สร้างงานให้ทีม AI</h3>
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Send a task to {runtimeConnected ? runtimeDetail : "the Agent Runtime"} and monitor the queue below.
+            ส่งงานไปยัง {runtimeConnected ? runtimeDetail : "Agent Runtime"} แล้วติดตามสถานะในคิวด้านล่าง
           </p>
         </div>
         <span
@@ -102,23 +109,23 @@ export function TaskCreator({
             runtimeConnected ? "bg-emerald-400/15 text-emerald-200" : "bg-rose-400/15 text-rose-200"
           }`}
         >
-          {runtimeConnected ? "runtime ready" : "runtime offline"}
+          {runtimeConnected ? "runtime พร้อมใช้งาน" : "runtime ยังไม่พร้อม"}
         </span>
       </div>
 
       <div className="mt-5 grid gap-3 lg:grid-cols-2">
         <label className="text-sm text-slate-300">
-          Task title
+          ชื่องาน
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Generate identity-service skeleton"
+            placeholder="สร้างโครงสร้าง identity-service"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none ring-sky-400/0 transition focus:ring-2"
           />
         </label>
 
         <label className="text-sm text-slate-300">
-          Owner agent
+          Agent ผู้รับผิดชอบ
           <select
             value={owner}
             onChange={(event) => setOwner(event.target.value)}
@@ -133,7 +140,7 @@ export function TaskCreator({
         </label>
 
         <label className="text-sm text-slate-300">
-          Service
+          Service / ขอบเขตงาน
           <select
             value={service}
             onChange={(event) => setService(event.target.value)}
@@ -148,7 +155,7 @@ export function TaskCreator({
         </label>
 
         <label className="text-sm text-slate-300">
-          Priority
+          ความสำคัญ
           <select
             value={priority}
             onChange={(event) => setPriority(event.target.value as TaskPriority)}
@@ -156,7 +163,7 @@ export function TaskCreator({
           >
             {priorities.map((item) => (
               <option key={item} value={item}>
-                {item}
+                {priorityLabels[item]}
               </option>
             ))}
           </select>
@@ -164,11 +171,11 @@ export function TaskCreator({
       </div>
 
       <label className="mt-3 block text-sm text-slate-300">
-        Acceptance gate
+        เกณฑ์ผ่านงาน
         <textarea
           value={acceptanceGate}
           onChange={(event) => setAcceptanceGate(event.target.value)}
-          placeholder="Clean Architecture layers exist and tests pass"
+          placeholder="มี Clean Architecture ครบ 4 layer และ test ผ่าน"
           rows={3}
           className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none ring-sky-400/0 transition focus:ring-2"
         />
@@ -191,7 +198,7 @@ export function TaskCreator({
           disabled={!canSubmit || isSubmitting}
           className="rounded-2xl bg-sky-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
         >
-          {isSubmitting ? "Sending..." : "Send to agent queue"}
+          {isSubmitting ? "กำลังส่ง..." : "ส่งเข้าคิว Agent"}
         </button>
       </div>
     </form>

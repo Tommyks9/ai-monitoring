@@ -13,6 +13,7 @@
     "ทุก service ต้องแยก Domain, Data, Infrastructure, Presentation ตาม Clean Architecture",
     "โค้ดพื้นฐานซ้ำ เช่น DTO, logger, exception, proto, repository base ต้องอยู่ใน /libs/common",
     "งานที่กระทบ payment, trip, identity และ location ต้องมี test และ migration/index plan",
+    "ทุก agent ต้องสื่อสารกับ owner เป็นภาษาไทยก่อนเสมอ ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค",
     "ทุก agent ต้องส่งมอบ handoff note พร้อมไฟล์ที่แก้, risk, test result และ next action"
   ],
   "teams": [

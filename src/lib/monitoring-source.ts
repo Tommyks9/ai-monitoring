@@ -13,7 +13,7 @@ function publicRuntimeLabel(url: string) {
     const parsed = new URL(url);
     return parsed.origin;
   } catch {
-    return "Configured remote runtime";
+    return "runtime ที่ตั้งค่าไว้";
   }
 }
 
@@ -28,7 +28,7 @@ async function fetchRuntimeJson<T>(baseUrl: string, path: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}`);
+    throw new Error(`${path} ตอบกลับด้วยสถานะ ${response.status}`);
   }
 
   return (await response.json()) as T;
@@ -52,7 +52,7 @@ export async function getMonitoringSnapshot(): Promise<MonitoringSnapshot> {
     return {
       source: {
         mode: "remote",
-        label: "Remote agent runtime",
+        label: "Agent Runtime ที่เชื่อมต่ออยู่",
         detail: publicRuntimeLabel(baseUrl),
         lastUpdated: new Date().toISOString(),
       },
@@ -64,7 +64,7 @@ export async function getMonitoringSnapshot(): Promise<MonitoringSnapshot> {
       operatingSteps,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown remote runtime error";
-    return createMockSnapshot(`Remote runtime unavailable (${message}). Showing mock data instead.`);
+    const message = error instanceof Error ? error.message : "ไม่ทราบสาเหตุ";
+    return createMockSnapshot(`Agent Runtime ยังใช้งานไม่ได้ (${message}) กำลังแสดงข้อมูลจำลองแทน`);
   }
 }

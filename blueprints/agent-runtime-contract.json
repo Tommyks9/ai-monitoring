@@ -1,37 +1,42 @@
 {
-  "name": "OunJai Agent Runtime Contract",
+  "name": "OunJai Agent Runtime Contract ภาษาไทย",
   "version": "1.0",
-  "purpose": "Contract สำหรับ dispatch งานจาก Agent Runtime ไปยัง agent runner จริง เช่น CrewAI, AutoGen หรือ custom webhook workers",
+  "purpose": "ข้อตกลงกลางสำหรับ dispatch งานจาก Agent Runtime ไปยัง agent runner จริง เช่น CrewAI, AutoGen หรือ custom webhook workers โดย agent ต้องรายงานผลกับ owner เป็นภาษาไทย",
   "dispatch": {
     "default_mode": "hybrid",
     "modes": {
-      "local": "ใช้ local worker simulation ใน runtime เท่านั้น",
+      "local": "ใช้ worker จำลองภายใน runtime เท่านั้น",
       "webhook": "ส่งงานออกไป agent runner URL เท่านั้น ถ้าส่งไม่ได้ให้ block task",
-      "hybrid": "ส่งงานออกไป agent runner URL ถ้ามี ถ้าไม่มีหรือส่งไม่ได้ให้ fallback เป็น local worker"
+      "hybrid": "ส่งงานออกไป agent runner URL ถ้ามี ถ้าไม่มีหรือส่งไม่ได้ให้ fallback เป็น worker จำลองในเครื่อง"
     },
     "environment": {
       "AGENT_DISPATCH_MODE": "local | webhook | hybrid",
-      "AGENT_RUNNER_URL": "default webhook URL สำหรับทุก agent",
-      "AGENT_RUNNER_TOKEN": "optional bearer token สำหรับ agent runner",
-      "AGENT_RUNNER_<AGENT_ID>_URL": "per-agent webhook URL เช่น AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL"
+      "AGENT_RUNNER_URL": "URL webhook เริ่มต้นสำหรับทุก agent",
+      "AGENT_RUNNER_TOKEN": "bearer token แบบ optional สำหรับ agent runner",
+      "AGENT_RUNNER_<AGENT_ID>_URL": "URL webhook แยกตาม agent เช่น AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL"
     }
+  },
+  "communication": {
+    "language": "th-TH",
+    "policy": "ทุก agent ต้องสื่อสารกับ owner เป็นภาษาไทยก่อนเสมอ ทั้ง progress, blocker, handoff, risk และ recommendation ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค",
+    "handoff_required_language": "Thai"
   },
   "fine_tuning": {
     "dataset_policy": {
       "source": [
-        "accepted handoff notes",
-        "passed QA test reports",
-        "approved architecture decisions",
-        "service README examples",
-        "successful CLI command logs"
+        "handoff notes ภาษาไทยที่ผ่านการตรวจแล้ว",
+        "รายงาน QA/test ที่ผ่านเกณฑ์",
+        "architecture decisions ที่ได้รับอนุมัติ",
+        "ตัวอย่าง README ราย service",
+        "command logs ของ CLI ที่สำเร็จ"
       ],
       "do_not_train_on": [
         "secrets",
         ".env files",
-        "private customer data",
-        "unreviewed failed outputs"
+        "ข้อมูลส่วนตัวของลูกค้า",
+        "output ที่ล้มเหลวและยังไม่ผ่าน review"
       ],
-      "format": "jsonl instruction/input/output records",
+      "format": "jsonl instruction/input/output records โดย output เป็นภาษาไทย",
       "review_gate": "QA Automation Agent และ Documentation Agent ต้องอนุมัติก่อนนำเข้า fine-tuning set"
     },
     "profiles": {

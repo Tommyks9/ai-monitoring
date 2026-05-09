@@ -63,7 +63,7 @@ const server = createServer(async (request, response) => {
 
   try {
     if (!isAuthorized(request)) {
-      sendJson(response, 401, { error: "Unauthorized" });
+      sendJson(response, 401, { error: "ไม่ได้รับอนุญาต" });
       return;
     }
 
@@ -153,7 +153,7 @@ const server = createServer(async (request, response) => {
       addEvent({
         agent: workItem.owner,
         type: "handoff",
-        message: `Queued ${workItem.id}: ${workItem.title}`,
+        message: `เพิ่มงาน ${workItem.id} เข้าคิวแล้ว: ${workItem.title}`,
       });
       await runDispatcherCycle({ manual: true });
       sendJson(response, 201, workItem);
@@ -166,12 +166,12 @@ const server = createServer(async (request, response) => {
       const workItem = state.workItems.find((item) => item.id === stateMatch[1]);
 
       if (!workItem) {
-        sendJson(response, 404, { error: "Work item not found" });
+        sendJson(response, 404, { error: "ไม่พบ work item" });
         return;
       }
 
       if (!workStates.has(body.state)) {
-        sendJson(response, 400, { error: "Invalid work item state" });
+        sendJson(response, 400, { error: "สถานะงานไม่ถูกต้อง" });
         return;
       }
 
@@ -191,7 +191,7 @@ const server = createServer(async (request, response) => {
       addEvent({
         agent: body.agent ?? workItem.owner,
         type: body.state === "blocked" ? "blocker" : "handoff",
-        message: body.note ?? `${workItem.id} moved to ${body.state}`,
+        message: body.note ?? `${workItem.id} เปลี่ยนสถานะเป็น ${toThaiWorkState(body.state)}`,
       });
       sendJson(response, 200, workItem);
       return;
@@ -203,7 +203,7 @@ const server = createServer(async (request, response) => {
       const agentRun = findAgentRun(eventMatch[1]);
 
       if (!agentRun) {
-        sendJson(response, 404, { error: "Agent run not found" });
+        sendJson(response, 404, { error: "ไม่พบ agent run" });
         return;
       }
 
@@ -226,12 +226,12 @@ const server = createServer(async (request, response) => {
       const agentRun = findAgentRun(heartbeatMatch[1]);
 
       if (!agentRun) {
-        sendJson(response, 404, { error: "Agent run not found" });
+        sendJson(response, 404, { error: "ไม่พบ agent run" });
         return;
       }
 
       updateAgentRun(agentRun, body);
-      agentRun.lastSignal = body.lastSignal ?? `Heartbeat received at ${currentTime()}`;
+      agentRun.lastSignal = body.lastSignal ?? `ได้รับ heartbeat เวลา ${currentTime()}`;
       if (body.workItemId) {
         updateWorkItemFromAgent(body.workItemId, agentRun, body);
       }
@@ -239,31 +239,31 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    sendJson(response, 404, { error: "Route not found" });
+    sendJson(response, 404, { error: "ไม่พบ route นี้" });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown runtime error";
+    const message = error instanceof Error ? error.message : "เกิด runtime error ที่ไม่ทราบสาเหตุ";
     sendJson(response, 500, { error: message });
   }
 });
 
 server.listen(port, () => {
-  console.log(`OunJai Agent Runtime listening on http://localhost:${port}`);
-  console.log(authToken ? "Bearer token auth is enabled." : "Bearer token auth is disabled.");
+  console.log(`OunJai Agent Runtime พร้อมใช้งานที่ http://localhost:${port}`);
+  console.log(authToken ? "เปิดใช้งาน Bearer token แล้ว" : "ยังไม่ได้เปิด Bearer token เหมาะสำหรับ local development");
   console.log(
     dispatcherEnabled
-      ? `Dispatcher loop is enabled (${dispatcherIntervalMs}ms interval, mode: ${dispatchMode}).`
-      : "Dispatcher loop is disabled.",
+      ? `เปิด dispatcher loop แล้ว (${dispatcherIntervalMs}ms, โหมด: ${dispatchMode})`
+      : "ปิด dispatcher loop แล้ว",
   );
 });
 
 if (dispatcherEnabled) {
   setInterval(() => {
     runDispatcherCycle().catch((error) => {
-      const message = error instanceof Error ? error.message : "Unknown dispatcher error";
+      const message = error instanceof Error ? error.message : "ไม่ทราบสาเหตุของ dispatcher error";
       addEvent({
         agent: "Agent Runtime",
         type: "blocker",
-        message: `Dispatcher cycle failed: ${message}`,
+        message: `รอบ dispatcher ล้มเหลว: ${message}`,
       });
     });
   }, dispatcherIntervalMs);
@@ -307,13 +307,13 @@ function loadLocalEnv() {
 
 function createAgentRuns() {
   const currentTasks = {
-    "architect-agent": "Lock trip/payment saga boundaries and gateway contracts",
-    "shared-lib-agent": "Prepare /libs/common contract package for proto, logger and exception filter",
-    "lead-developer-agent": "Generate NestJS service skeletons from system-blueprint.json",
-    "database-engineer-agent": "Design location 2dsphere index and trip consistency model",
-    "frontend-agent": "Prepare admin dashboard and mobile flows from gateway contracts",
-    "qa-automation-agent": "Draft acceptance matrix for trip booking and payment flows",
-    "documentation-agent": "Create service README template and gRPC sequence diagram backlog",
+    "architect-agent": "ล็อกขอบเขต Saga ของ trip/payment และ contract ของ gateway",
+    "shared-lib-agent": "เตรียมแพ็กเกจ contract กลางใน /libs/common สำหรับ proto, logger และ exception filter",
+    "lead-developer-agent": "สร้างโครง NestJS services จาก system-blueprint.json",
+    "database-engineer-agent": "ออกแบบ 2dsphere index ของ location และ consistency model ของ trip",
+    "frontend-agent": "เตรียม dashboard admin และ mobile flows จาก gateway contracts",
+    "qa-automation-agent": "ร่าง acceptance matrix สำหรับการจองรถและการชำระเงิน",
+    "documentation-agent": "สร้าง template README ราย service และ backlog sequence diagram ของ gRPC",
   };
   const statuses = ["review", "working", "working", "blocked", "idle", "review", "working"];
   const health = [92, 88, 84, 71, 86, 90, 94];
@@ -323,14 +323,14 @@ function createAgentRuns() {
     id: `run-${agent.id.replace("-agent", "")}-001`,
     agentId: agent.id,
     agentName: agent.name,
-    team: teamByAgent.get(agent.id) ?? "Unassigned",
+    team: teamByAgent.get(agent.id) ?? "ยังไม่ระบุทีม",
     status: statuses[index] ?? "idle",
-    currentTask: currentTasks[agent.id] ?? "Waiting for task assignment",
+    currentTask: currentTasks[agent.id] ?? "รอรับงานถัดไป",
     health: health[index] ?? 80,
     progress: progress[index] ?? 10,
     queueDepth: index + 2,
-    lastSignal: "Runtime seeded from OunJai agent registry",
-    risk: agent.approval_gates?.[0] ?? "No active risk",
+    lastSignal: "เริ่มต้น runtime จาก OunJai agent registry แล้ว",
+    risk: agent.approval_gates?.[0] ?? "ยังไม่มีความเสี่ยงที่ต้องเฝ้าระวัง",
   }));
 }
 
@@ -338,56 +338,56 @@ function createWorkItems() {
   return [
     {
       id: "OUNJAI-001",
-      title: "Create /libs/common foundation",
+      title: "สร้าง foundation ของ /libs/common",
       owner: "Shared Lib Agent",
       priority: "critical",
       state: "in_progress",
       dispatchStatus: "running",
       service: "/libs/common",
-      acceptanceGate: "No duplicated DTO/logger/exception code in services",
+      acceptanceGate: "ห้ามมี DTO/logger/exception code ซ้ำใน service ต่าง ๆ",
       assignedRunId: "run-shared-lib-001",
       dispatchMode: "local",
       progress: 64,
       startedAt: currentTime(),
-      lastSignal: "Shared Lib Agent is extracting common contracts.",
+      lastSignal: "Shared Lib Agent กำลังสกัด common contracts",
       updatedAt: currentTime(),
     },
     {
       id: "OUNJAI-002",
-      title: "Generate 9 NestJS service skeletons",
+      title: "สร้างโครง NestJS services ทั้ง 9 ตัว",
       owner: "Lead Developer Agent",
       priority: "critical",
       state: "queued",
       dispatchStatus: "waiting",
-      service: "all services",
-      acceptanceGate: "Ports 60051-60059 match blueprint",
+      service: "ทุก service",
+      acceptanceGate: "ports 60051-60059 ต้องตรงกับ blueprint",
       progress: 0,
       updatedAt: currentTime(),
     },
     {
       id: "OUNJAI-003",
-      title: "Design location tracking schema",
+      title: "ออกแบบ schema สำหรับ location tracking",
       owner: "Database Engineer Agent",
       priority: "high",
       state: "blocked",
       dispatchStatus: "blocked",
       service: "location-service",
-      acceptanceGate: "2dsphere index and stale-location policy documented",
+      acceptanceGate: "ต้องมี 2dsphere index และนโยบาย stale location ในเอกสาร",
       progress: 35,
-      lastSignal: "Blocked until trip state naming is finalized.",
+      lastSignal: "ติดขัดจนกว่าจะสรุปชื่อ state ของ trip",
       updatedAt: currentTime(),
     },
     {
       id: "OUNJAI-004",
-      title: "Build trip/payment acceptance matrix",
+      title: "สร้าง acceptance matrix สำหรับ trip/payment",
       owner: "QA Automation Agent",
       priority: "high",
       state: "review",
       dispatchStatus: "review",
       service: "trip-service, payment-service",
-      acceptanceGate: "Duplicate charge and duplicate booking tests listed",
+      acceptanceGate: "ต้องมีรายการ test ป้องกันตัดเงินซ้ำและจองซ้ำ",
       progress: 92,
-      handoff: "Acceptance matrix ready for product review.",
+      handoff: "acceptance matrix พร้อมให้ product ตรวจแล้ว",
       updatedAt: currentTime(),
     },
   ];
@@ -400,14 +400,14 @@ function createEvents() {
       time: currentTime(),
       agent: "Architect Agent",
       type: "decision",
-      message: "Selected Saga + Transaction Outbox as the default trip/payment consistency pattern.",
+      message: "เลือก Saga + Transaction Outbox เป็น pattern หลักสำหรับ consistency ของ trip/payment",
     },
     {
       id: "evt-002",
       time: currentTime(),
       agent: "Shared Lib Agent",
       type: "handoff",
-      message: "Published shared contract boundary for proto, DTO, logger and exception modules.",
+      message: "เผยแพร่ขอบเขต shared contract สำหรับ proto, DTO, logger และ exception modules แล้ว",
     },
   ];
 }
@@ -424,16 +424,16 @@ function createServiceReadiness() {
     readiness: readinessSeed[index] ?? 25,
     nextGate:
       service.name === "location-service"
-        ? "2dsphere index plan"
+        ? "แผน 2dsphere index"
         : service.name === "trip-service" || service.name === "payment-service"
-          ? "consistency and idempotency gate"
-          : "Clean Architecture skeleton",
+          ? "gate consistency และ idempotency"
+          : "โครง Clean Architecture",
   }));
 }
 
 function createWorkItem(body) {
   if (!body.title || !body.owner) {
-    throw new Error("Work item requires title and owner");
+    throw new Error("ต้องระบุชื่องานและ agent ผู้รับผิดชอบ");
   }
 
   const nextNumber = String(state.workItems.length + 1).padStart(3, "0");
@@ -445,7 +445,7 @@ function createWorkItem(body) {
     state: body.state ?? "queued",
     dispatchStatus: toDispatchStatus(body.state ?? "queued"),
     service: body.service ?? "unassigned",
-    acceptanceGate: body.acceptanceGate ?? "Acceptance gate pending",
+    acceptanceGate: body.acceptanceGate ?? "รอระบุเกณฑ์ผ่านงาน",
     progress: 0,
     updatedAt: currentTime(),
   };
@@ -514,7 +514,7 @@ async function dispatchToAgentRunner(agentRun, workItem, runnerUrl) {
     if (!response.ok) {
       return {
         ok: false,
-        error: `Agent runner returned ${response.status}`,
+        error: `agent runner ตอบกลับด้วยสถานะ ${response.status}`,
       };
     }
 
@@ -522,7 +522,7 @@ async function dispatchToAgentRunner(agentRun, workItem, runnerUrl) {
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Unknown agent runner dispatch error",
+      error: error instanceof Error ? error.message : "ไม่ทราบสาเหตุของ agent runner dispatch error",
     };
   }
 }
@@ -536,6 +536,10 @@ function createAgentDispatchPayload(agentRun, workItem) {
     runtime: {
       name: "OunJai Agent Runtime",
       callbackBaseUrl: process.env.AGENT_RUNTIME_PUBLIC_URL ?? `http://localhost:${port}`,
+    },
+    communication: {
+      language: "th-TH",
+      policy: "ตอบกลับและส่ง handoff/progress/error เป็นภาษาไทยก่อนเสมอ ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค",
     },
     agent: {
       id: agentRun.agentId,
@@ -598,7 +602,7 @@ function updateWorkItemFromAgent(workItemId, agentRun, body) {
   }
 
   item.updatedAt = currentTime();
-  agentRun.currentTask = item.state === "done" ? "Waiting for next task assignment" : item.title;
+  agentRun.currentTask = item.state === "done" ? "รอรับงานถัดไป" : item.title;
 }
 
 function blockWorkItem(item, agent, reason) {
@@ -635,24 +639,24 @@ function getAgentStep(agentId, priority) {
 
 function createAgentSignal(agentRun, item, progress) {
   if (progress < 30) {
-    return `${agentRun.agentName} is reading blueprint and acceptance gate for ${item.id}`;
+    return `${agentRun.agentName} กำลังอ่าน blueprint และ acceptance gate ของงาน ${item.id}`;
   }
   if (progress < 65) {
-    return `${agentRun.agentName} is executing ${item.service} work for ${item.id}`;
+    return `${agentRun.agentName} กำลังทำงานส่วน ${item.service} สำหรับงาน ${item.id}`;
   }
   if (progress < 100) {
-    return `${agentRun.agentName} is validating output for ${item.id}`;
+    return `${agentRun.agentName} กำลังตรวจผลลัพธ์ของงาน ${item.id}`;
   }
-  return `${agentRun.agentName} completed execution for ${item.id}`;
+  return `${agentRun.agentName} ทำงาน ${item.id} เสร็จแล้ว`;
 }
 
 function createHandoff(agentRun, item) {
-  return `${agentRun.agentName} handoff for ${item.id}: ${item.title} is ready for review. Gate: ${item.acceptanceGate}`;
+  return `Handoff จาก ${agentRun.agentName} สำหรับงาน ${item.id}: ${item.title} พร้อมตรวจแล้ว เกณฑ์ผ่านงาน: ${item.acceptanceGate}`;
 }
 
 function updateServiceReadiness(serviceName, priority) {
   const services =
-    serviceName === "all services"
+    serviceName === "ทุก service" || serviceName === "all services"
       ? state.serviceReadiness
       : state.serviceReadiness.filter((service) => service.name === serviceName);
 
@@ -707,7 +711,7 @@ async function dispatchQueuedWork() {
     const agentRun = findAgentRunByOwner(item.owner);
 
     if (!agentRun) {
-      blockWorkItem(item, item.owner, `No registered agent found for owner ${item.owner}`);
+      blockWorkItem(item, item.owner, `ไม่พบ agent ที่ลงทะเบียนไว้สำหรับผู้รับผิดชอบ ${item.owner}`);
       continue;
     }
 
@@ -726,12 +730,12 @@ async function dispatchQueuedWork() {
     item.progress = 5;
     item.startedAt = currentTime();
     item.updatedAt = currentTime();
-    item.lastSignal = `${agentRun.agentName} accepted ${item.id}`;
+    item.lastSignal = `${agentRun.agentName} รับงาน ${item.id} แล้ว`;
 
     agentRun.status = "working";
     agentRun.currentTask = item.title;
     agentRun.progress = item.progress;
-    agentRun.lastSignal = `Accepted ${item.id}: ${item.title}`;
+    agentRun.lastSignal = `รับงาน ${item.id}: ${item.title}`;
     agentRun.risk = item.acceptanceGate;
 
     activeAssignments.set(item.id, {
@@ -756,10 +760,10 @@ async function dispatchQueuedWork() {
         item.dispatchMode = "local";
         item.dispatchStatus = "assigned";
         activeAssignments.get(item.id).mode = "local";
-        item.lastSignal = `Webhook unavailable; local worker fallback started (${delivery.error})`;
+        item.lastSignal = `webhook ใช้งานไม่ได้ จึง fallback เป็น local worker (${delivery.error})`;
       } else {
         item.dispatchStatus = "sent_to_agent";
-        item.lastSignal = `Dispatched ${item.id} to external runner ${publicUrlLabel(runnerUrl)}`;
+        item.lastSignal = `ส่งงาน ${item.id} ไปยัง runner ภายนอก ${publicUrlLabel(runnerUrl)} แล้ว`;
       }
     }
 
@@ -768,8 +772,8 @@ async function dispatchQueuedWork() {
       type: "handoff",
       message:
         mode === "webhook"
-          ? `Dispatcher sent ${item.id} to external ${agentRun.agentName} runner.`
-          : `Dispatcher assigned ${item.id} to local ${agentRun.agentName} worker.`,
+          ? `Dispatcher ส่งงาน ${item.id} ไปยัง runner จริงของ ${agentRun.agentName} แล้ว`
+          : `Dispatcher มอบหมายงาน ${item.id} ให้ local worker ของ ${agentRun.agentName} แล้ว`,
     });
     dispatched += 1;
   }
@@ -791,7 +795,7 @@ function progressActiveAssignments() {
     if (assignment.mode === "webhook") {
       item.updatedAt = currentTime();
       item.dispatchStatus = "sent_to_agent";
-      agentRun.lastSignal = `Waiting for external runner heartbeat for ${item.id}`;
+      agentRun.lastSignal = `กำลังรอ heartbeat จาก external runner สำหรับงาน ${item.id}`;
       continue;
     }
 
@@ -812,7 +816,7 @@ function progressActiveAssignments() {
       item.state = "review";
       item.progress = 100;
       item.handoff = createHandoff(agentRun, item);
-      item.lastSignal = `${agentRun.agentName} produced handoff for ${item.id}`;
+      item.lastSignal = `${agentRun.agentName} สร้าง handoff สำหรับงาน ${item.id} แล้ว`;
       addEvent({
         agent: agentRun.agentName,
         type: agentRun.agentId === "qa-automation-agent" ? "test" : "handoff",
@@ -840,7 +844,7 @@ function completeReviewedWork() {
     assignment.reviewTicks += 1;
     agentRun.status = "review";
     agentRun.progress = 96;
-    agentRun.lastSignal = `Reviewing ${item.id}: ${item.acceptanceGate}`;
+    agentRun.lastSignal = `กำลังตรวจงาน ${item.id}: ${item.acceptanceGate}`;
 
     if (assignment.reviewTicks < 2) {
       continue;
@@ -851,18 +855,18 @@ function completeReviewedWork() {
     item.progress = 100;
     item.completedAt = currentTime();
     item.updatedAt = currentTime();
-    item.lastSignal = `${item.id} passed acceptance gate`;
+    item.lastSignal = `งาน ${item.id} ผ่าน acceptance gate แล้ว`;
 
     agentRun.status = "idle";
     agentRun.progress = 0;
-    agentRun.currentTask = "Waiting for next task assignment";
-    agentRun.lastSignal = `${item.id} completed and ready for next dispatch`;
+    agentRun.currentTask = "รอรับงานถัดไป";
+    agentRun.lastSignal = `งาน ${item.id} เสร็จแล้ว พร้อมรับ dispatch ถัดไป`;
 
     activeAssignments.delete(workItemId);
     addEvent({
       agent: agentRun.agentName,
       type: "deploy",
-      message: `${item.id} completed: ${item.acceptanceGate}`,
+      message: `งาน ${item.id} เสร็จแล้ว: ${item.acceptanceGate}`,
     });
     reviewed += 1;
   }
@@ -914,6 +918,18 @@ function toDispatchStatus(stateValue) {
   );
 }
 
+function toThaiWorkState(stateValue) {
+  return (
+    {
+      queued: "รอคิว",
+      in_progress: "กำลังทำ",
+      review: "รอตรวจ",
+      blocked: "ติดขัด",
+      done: "เสร็จแล้ว",
+    }[stateValue] ?? stateValue
+  );
+}
+
 function normalize(value) {
   return String(value ?? "")
     .trim()
@@ -925,7 +941,7 @@ function publicUrlLabel(value) {
     const parsed = new URL(value);
     return parsed.origin;
   } catch {
-    return "configured runner";
+    return "runner ที่ตั้งค่าไว้";
   }
 }
 

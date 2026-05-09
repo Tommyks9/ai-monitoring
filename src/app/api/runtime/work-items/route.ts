@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   });
 
   const data = await response.json().catch(() => ({
-    error: `Runtime returned ${response.status}`,
+    error: `Runtime ตอบกลับด้วยสถานะ ${response.status}`,
   }));
 
   return NextResponse.json(data, { status: response.status });
