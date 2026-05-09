@@ -90,7 +90,9 @@
       "dispatcher_enabled_env": "AGENT_RUNTIME_DISPATCHER",
       "dispatcher_interval_env": "AGENT_RUNTIME_DISPATCH_INTERVAL_MS",
       "dispatch_mode_env": "AGENT_DISPATCH_MODE",
-      "agent_runner_url_env": "AGENT_RUNNER_URL"
+      "agent_runner_url_env": "AGENT_RUNNER_URL",
+      "cursor_worker_script": "npm run cursor-worker",
+      "cursor_agent_command_env": "CURSOR_AGENT_COMMAND"
     },
     "api_endpoints": [
       "GET /health",

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "runtime": "node runtime/agent-runtime.mjs",
+    "cursor-worker": "node runtime/cursor-agent-worker.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

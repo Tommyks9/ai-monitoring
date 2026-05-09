@@ -2,6 +2,20 @@
 
 เอกสารนี้อธิบายวิธีต่อ OunJai Agent Runtime เข้ากับ runner จริง เช่น CrewAI, AutoGen หรือ custom worker service
 
+repo นี้มี Cursor Agent Worker ให้แล้วที่ `runtime/cursor-agent-worker.mjs`:
+
+```bash
+npm run cursor-worker
+```
+
+worker จะเปิดที่:
+
+```text
+http://localhost:5050/agent-dispatch
+```
+
+ถ้าตั้ง `CURSOR_AGENT_COMMAND` worker จะเรียก Cursor Agent/CLI จริง ถ้าไม่ตั้งจะ fallback เป็น handoff ภาษาไทยเพื่อให้ flow runtime/dashboard ทดสอบได้ครบก่อน
+
 ## Runtime dispatch modes
 
 ตั้งค่าผ่าน `.env.local`:
@@ -23,6 +37,25 @@ AGENT_DISPATCH_MODE=hybrid
 ```bash
 AGENT_RUNNER_URL=http://localhost:5050/agent-dispatch
 AGENT_RUNNER_TOKEN=
+```
+
+ตั้ง Cursor Agent command:
+
+```bash
+# ถ้า command รับ prompt ผ่าน stdin
+CURSOR_AGENT_COMMAND=cursor-agent
+
+# ถ้า command รับ prompt จากไฟล์
+CURSOR_AGENT_COMMAND=cursor-agent --prompt-file {promptFile}
+```
+
+ตัวแปร placeholder ที่ใช้ใน command ได้:
+
+```text
+{promptFile}
+{outputFile}
+{workItemId}
+{agentId}
 ```
 
 หรือแยก URL ต่อ agent:
@@ -95,6 +128,12 @@ lead-developer-agent -> AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL
 ## Callback จาก runner กลับ runtime
 
 ทุก callback ที่เป็นข้อความให้ส่งเป็นภาษาไทย เช่น `lastSignal`, `handoff`, `message`, `risk` และ `note`
+
+Cursor Agent Worker จะ callback ให้อัตโนมัติ:
+
+- heartbeat ตอนรับงาน
+- event/handoff ตอน Cursor Agent หรือ fallback ทำงานเสร็จ
+- state `done` ถ้า `CURSOR_AGENT_AUTO_COMPLETE=true`
 
 ### Heartbeat / progress
 

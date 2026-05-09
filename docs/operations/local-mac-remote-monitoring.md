@@ -48,9 +48,37 @@ curl http://localhost:4000/health
 curl http://localhost:4000/api/agents
 ```
 
-## 3. Run dashboard
+## 3. Run Cursor Agent Worker
 
 เปิด terminal ที่สอง:
+
+```bash
+npm run cursor-worker
+```
+
+worker จะรับ dispatch จาก runtime ที่:
+
+```text
+http://localhost:5050/agent-dispatch
+```
+
+ถ้าคุณมี Cursor Agent CLI แล้ว ให้ตั้งใน `.env.local`:
+
+```bash
+CURSOR_AGENT_COMMAND=cursor-agent
+```
+
+หรือถ้า command ต้องรับ prompt file:
+
+```bash
+CURSOR_AGENT_COMMAND=cursor-agent --prompt-file {promptFile}
+```
+
+ถ้ายังไม่ตั้ง `CURSOR_AGENT_COMMAND` worker จะ fallback เป็น handoff ภาษาไทย เพื่อให้ flow monitor/dispatch ทดสอบได้ก่อน
+
+## 4. Run dashboard
+
+เปิด terminal ที่สาม:
 
 ```bash
 npm run dev
@@ -66,7 +94,7 @@ http://localhost:3000
 
 ถ้าลบหรือเว้นว่าง `AGENT_RUNTIME_URL` หน้า dashboard จะ fallback ไปใช้ mock data ที่อยู่ใน repo
 
-## 4. สั่งงานทีมจากหน้า dashboard
+## 5. สั่งงานทีมจากหน้า dashboard
 
 ในหน้า `http://localhost:3000` จะมีกล่อง **Create work item**
 
@@ -120,7 +148,7 @@ AGENT_RUNTIME_DISPATCHER=false
 curl -X POST http://localhost:4000/api/dispatch/run-once
 ```
 
-## 5. ต่อกับ remote agent runtime
+## 6. ต่อกับ remote agent runtime
 
 ถ้าคุณ deploy runtime ไว้ที่ server หรือ VM ให้แก้ไฟล์ `.env.local` บน Mac:
 
@@ -150,7 +178,7 @@ GET /api/services/readiness
 Authorization: Bearer <AGENT_RUNTIME_TOKEN>
 ```
 
-## 6. Local runtime endpoints
+## 7. Local runtime endpoints
 
 runtime local ที่มากับ repo รองรับ endpoints เหล่านี้:
 
@@ -195,7 +223,7 @@ curl -X POST http://localhost:4000/api/agent-runs/lead-developer-agent/heartbeat
   }'
 ```
 
-## 7. รูปแบบข้อมูลที่ remote ต้องส่ง
+## 8. รูปแบบข้อมูลที่ remote ต้องส่ง
 
 ให้ remote runtime ส่ง JSON ตาม contract ใน:
 
@@ -223,7 +251,7 @@ blueprints/monitoring-schema.json
 ]
 ```
 
-## 8. ถ้า remote ยังไม่ public
+## 9. ถ้า remote ยังไม่ public
 
 คุณมี 2 ทางเลือก:
 
@@ -242,7 +270,7 @@ ngrok http 4000
 AGENT_RUNTIME_URL=https://xxxx.ngrok-free.app
 ```
 
-## 9. ถ้าจะให้คนอื่นเปิดดู dashboard บน Mac ของคุณ
+## 10. ถ้าจะให้คนอื่นเปิดดู dashboard บน Mac ของคุณ
 
 ตัวนี้เป็นอีกกรณีหนึ่ง: ถ้าคุณรัน dashboard บน Mac แล้วอยากให้คนอื่นเปิดดูจากข้างนอก ให้ tunnel port 3000:
 
@@ -252,7 +280,7 @@ ngrok http 3000
 
 แต่การ tunnel dashboard ไม่ได้ทำให้มีข้อมูล remote เอง ข้อมูล remote ยังต้องมาจาก `AGENT_RUNTIME_URL`
 
-## 10. หมายเหตุด้านความปลอดภัย
+## 11. หมายเหตุด้านความปลอดภัย
 
 - อย่าใส่ token ใน `NEXT_PUBLIC_*`
 - ใช้ `AGENT_RUNTIME_TOKEN` เพราะ Next.js อ่านฝั่ง server เท่านั้น
