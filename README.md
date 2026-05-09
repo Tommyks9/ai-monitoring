@@ -50,6 +50,15 @@ http://localhost:3000
 - ใส่ acceptance gate
 - กด **Send to agent queue**
 
+หลังจากส่งงานแล้ว runtime dispatcher จะ:
+
+1. จับงาน `queued`
+2. assign ให้ owner agent
+3. ส่ง webhook ไป agent runner จริงถ้าตั้ง `AGENT_RUNNER_*_URL`
+4. fallback เป็น local worker ถ้าใช้ `AGENT_DISPATCH_MODE=hybrid`
+5. ส่ง heartbeat/progress/event กลับ dashboard
+6. ปิดงานเป็น `review` แล้ว `done`
+
 Agent Runtime จะอยู่ที่:
 
 ```text
@@ -68,6 +77,9 @@ AGENT_RUNTIME_TOKEN=optional-secret-token
 ```bash
 AGENT_RUNTIME_URL=http://localhost:4000
 AGENT_RUNTIME_PORT=4000
+AGENT_RUNTIME_DISPATCHER=true
+AGENT_RUNTIME_DISPATCH_INTERVAL_MS=4000
+AGENT_DISPATCH_MODE=hybrid
 ```
 
 ถ้าไม่ตั้งค่า `AGENT_RUNTIME_URL` dashboard จะใช้ mock data ใน repo และยัง run ได้ปกติ
@@ -84,10 +96,12 @@ npm run build
 
 - `blueprints/system-blueprint.json` - master blueprint ของ OunJai microservices, ports, database strategy และ gateways
 - `blueprints/agent-registry.json` - registry ของทีม/agent, responsibility, input/output และ approval gates
+- `blueprints/agent-runtime-contract.json` - prompt/fine-tuning/dispatch contract สำหรับต่อ CrewAI, AutoGen หรือ webhook runner
 - `blueprints/monitoring-schema.json` - schema กลางสำหรับ agent run, work item, event stream และ service readiness
 - `docs/agents/README.md` - prompt pack ภาษาไทยสำหรับ Architect, Shared Lib, Database, Lead Dev, Frontend, Documentation และ QA agents
 - `docs/operations/agent-operating-model.md` - workflow, handoff, quality gates และลำดับการทำงานของทีม
 - `docs/operations/monitoring-dashboard.md` - data contract และ roadmap สำหรับต่อ orchestrator/backend monitoring
+- `docs/operations/agent-runner-integration.md` - วิธีต่อ runtime ไปหา agent runner จริงและ callback progress กลับ dashboard
 - `docs/operations/local-mac-remote-monitoring.md` - วิธี run dashboard บน Mac และดู remote agents
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
 - `runtime/agent-runtime.mjs` - local Agent Runtime API สำหรับส่งสถานะ agents/tasks/events ให้ dashboard

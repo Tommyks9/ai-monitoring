@@ -86,7 +86,11 @@
       "default_url": "http://localhost:4000",
       "default_port_env": "AGENT_RUNTIME_PORT",
       "dashboard_url_env": "AGENT_RUNTIME_URL",
-      "optional_token_env": "AGENT_RUNTIME_TOKEN"
+      "optional_token_env": "AGENT_RUNTIME_TOKEN",
+      "dispatcher_enabled_env": "AGENT_RUNTIME_DISPATCHER",
+      "dispatcher_interval_env": "AGENT_RUNTIME_DISPATCH_INTERVAL_MS",
+      "dispatch_mode_env": "AGENT_DISPATCH_MODE",
+      "agent_runner_url_env": "AGENT_RUNNER_URL"
     },
     "api_endpoints": [
       "GET /health",
@@ -95,13 +99,16 @@
       "GET /api/events",
       "GET /api/services/readiness",
       "GET /api/snapshot",
+      "GET /api/dispatch/status",
       "POST /api/work-items",
+      "POST /api/dispatch/run-once",
       "PATCH /api/work-items/:id/state",
       "POST /api/agent-runs/:id/events",
       "POST /api/agent-runs/:id/heartbeat"
     ],
     "agent_must_emit": [
       "agent_run.started",
+      "dispatcher.assigned",
       "agent_run.heartbeat",
       "work_item.state_changed",
       "agent_event.created",

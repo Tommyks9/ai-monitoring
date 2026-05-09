@@ -4,6 +4,15 @@ export type TaskPriority = "critical" | "high" | "medium" | "low";
 
 export type TaskState = "queued" | "in_progress" | "review" | "blocked" | "done";
 
+export type DispatchStatus =
+  | "waiting"
+  | "assigned"
+  | "sent_to_agent"
+  | "running"
+  | "review"
+  | "completed"
+  | "blocked";
+
 export type AgentRun = {
   id: string;
   agentId: string;
@@ -24,8 +33,17 @@ export type WorkItem = {
   owner: string;
   priority: TaskPriority;
   state: TaskState;
+  dispatchStatus?: DispatchStatus;
   service: string;
   acceptanceGate: string;
+  assignedRunId?: string;
+  dispatchMode?: "local" | "webhook";
+  runnerUrl?: string;
+  progress?: number;
+  startedAt?: string;
+  completedAt?: string;
+  handoff?: string;
+  lastSignal?: string;
   updatedAt: string;
 };
 

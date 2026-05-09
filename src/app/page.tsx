@@ -233,7 +233,7 @@ export default async function Home() {
           <SectionHeader
             eyebrow="Execution queue"
             title="Active task board"
-            description="Use this view to see which agent owns each work item, what gate must pass and where attention is needed."
+            description="Use this view to see which agent owns each work item, what gate must pass, and how the dispatcher is moving work through the agent lifecycle."
           />
           <TaskCreator
             owners={ownerOptions}
@@ -256,21 +256,39 @@ export default async function Home() {
                 className="grid grid-cols-12 gap-4 border-b border-white/5 px-5 py-4 text-sm text-slate-300 last:border-b-0"
               >
                 <span className="col-span-2 font-mono text-sky-200">{item.id}</span>
-                <span className="col-span-3 text-white">{item.title}</span>
+                <span className="col-span-3">
+                  <span className="text-white">{item.title}</span>
+                  {typeof item.progress === "number" ? (
+                    <span className="mt-2 block">
+                      <ProgressBar value={item.progress} />
+                      <span className="mt-1 block text-xs text-slate-500">{item.progress}% dispatch progress</span>
+                    </span>
+                  ) : null}
+                </span>
                 <span className="col-span-2">{item.owner}</span>
-                <span className="col-span-2 text-xs leading-5">{item.acceptanceGate}</span>
+                <span className="col-span-2 text-xs leading-5">
+                  {item.acceptanceGate}
+                  {item.lastSignal ? <span className="mt-1 block text-sky-200/80">{item.lastSignal}</span> : null}
+                  {item.handoff ? <span className="mt-1 block text-emerald-200/80">{item.handoff}</span> : null}
+                </span>
                 <span className={`col-span-1 font-medium ${priorityStyles[item.priority]}`}>{item.priority}</span>
                 <span className="col-span-2">
                   <span className={`rounded-full px-3 py-1 text-xs ${taskStateStyles[item.state]}`}>
                     {item.state.replace("_", " ")}
                   </span>
+                  {item.dispatchStatus ? (
+                    <span className="mt-2 block text-xs text-slate-500">dispatch: {item.dispatchStatus}</span>
+                  ) : null}
+                  {item.dispatchMode ? (
+                    <span className="mt-1 block text-xs text-slate-500">mode: {item.dispatchMode}</span>
+                  ) : null}
                 </span>
               </div>
             ))}
           </div>
           <p className="mt-4 text-sm text-slate-400">
-            Critical tasks waiting now: {criticalItems.length}. Update this board from agent run events once the
-            orchestrator is connected.
+            Critical tasks waiting now: {criticalItems.length}. Runtime dispatcher assigns queued work, emits
+            heartbeat signals, sends external webhook jobs when configured, and completes tasks after review.
           </p>
         </section>
 

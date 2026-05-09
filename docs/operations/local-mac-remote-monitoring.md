@@ -18,6 +18,9 @@ cp .env.example .env.local
 ```bash
 AGENT_RUNTIME_URL=http://localhost:4000
 AGENT_RUNTIME_PORT=4000
+AGENT_RUNTIME_DISPATCHER=true
+AGENT_RUNTIME_DISPATCH_INTERVAL_MS=4000
+AGENT_DISPATCH_MODE=hybrid
 AGENT_RUNTIME_TOKEN=
 AGENT_RUNTIME_CORS_ORIGIN=http://localhost:3000
 ```
@@ -87,6 +90,34 @@ POST http://localhost:4000/api/work-items
 
 วิธีนี้ช่วยไม่ให้ token ของ runtime ถูกส่งไปอยู่ฝั่ง browser โดยตรง
 
+หลังจากส่งงานแล้ว dispatcher ใน runtime จะทำงานเอง:
+
+```mermaid
+flowchart LR
+    Q[queued work item] --> A[assign to owner agent]
+    A --> W{runner URL configured?}
+    W -->|yes| R[POST to real agent runner]
+    W -->|no / hybrid fallback| L[local worker]
+    R --> H[heartbeat callbacks]
+    L --> H
+    H --> V[review + handoff]
+    V --> D[done]
+```
+
+ถ้าต้องการต่อกับ CrewAI/AutoGen/custom runner ดู `docs/operations/agent-runner-integration.md`
+
+ถ้าต้องการปิด auto-dispatch แล้วคุมเอง ให้ตั้ง:
+
+```bash
+AGENT_RUNTIME_DISPATCHER=false
+```
+
+แล้วสั่ง dispatch หนึ่งรอบด้วย:
+
+```bash
+curl -X POST http://localhost:4000/api/dispatch/run-once
+```
+
 ## 5. ต่อกับ remote agent runtime
 
 ถ้าคุณ deploy runtime ไว้ที่ server หรือ VM ให้แก้ไฟล์ `.env.local` บน Mac:
@@ -128,7 +159,9 @@ GET /api/work-items
 GET /api/events
 GET /api/services/readiness
 GET /api/snapshot
+GET /api/dispatch/status
 POST /api/work-items
+POST /api/dispatch/run-once
 PATCH /api/work-items/:id/state
 POST /api/agent-runs/:id/events
 POST /api/agent-runs/:id/heartbeat

@@ -22,6 +22,9 @@
 ```bash
 AGENT_RUNTIME_URL=http://localhost:4000
 AGENT_RUNTIME_PORT=4000
+AGENT_RUNTIME_DISPATCHER=true
+AGENT_RUNTIME_DISPATCH_INTERVAL_MS=4000
+AGENT_DISPATCH_MODE=hybrid
 AGENT_RUNTIME_TOKEN=
 ```
 
@@ -31,6 +34,7 @@ agent runtime ควร emit events ต่อไปนี้:
 
 ```text
 agent_run.started
+dispatcher.assigned
 agent_run.heartbeat
 work_item.state_changed
 agent_event.created
@@ -74,7 +78,9 @@ GET /api/work-items
 GET /api/events
 GET /api/services/readiness
 GET /api/snapshot
+GET /api/dispatch/status
 POST /api/work-items
+POST /api/dispatch/run-once
 POST /api/agent-runs/:id/events
 POST /api/agent-runs/:id/heartbeat
 PATCH /api/work-items/:id/state
@@ -87,6 +93,8 @@ POST /api/runtime/work-items
 ```
 
 proxy นี้จะ forward ไปที่ `AGENT_RUNTIME_URL/api/work-items` พร้อม bearer token ถ้ามีค่า `AGENT_RUNTIME_TOKEN`
+
+ถ้าต้องต่อ runner จริง เช่น CrewAI/AutoGen ให้ตั้ง `AGENT_RUNNER_URL` หรือ `AGENT_RUNNER_<AGENT_ID>_URL` และดูรายละเอียด payload/callback ที่ `docs/operations/agent-runner-integration.md`
 
 ## Storage Recommendation
 

@@ -1,0 +1,84 @@
+{
+  "name": "OunJai Agent Runtime Contract",
+  "version": "1.0",
+  "purpose": "Contract สำหรับ dispatch งานจาก Agent Runtime ไปยัง agent runner จริง เช่น CrewAI, AutoGen หรือ custom webhook workers",
+  "dispatch": {
+    "default_mode": "hybrid",
+    "modes": {
+      "local": "ใช้ local worker simulation ใน runtime เท่านั้น",
+      "webhook": "ส่งงานออกไป agent runner URL เท่านั้น ถ้าส่งไม่ได้ให้ block task",
+      "hybrid": "ส่งงานออกไป agent runner URL ถ้ามี ถ้าไม่มีหรือส่งไม่ได้ให้ fallback เป็น local worker"
+    },
+    "environment": {
+      "AGENT_DISPATCH_MODE": "local | webhook | hybrid",
+      "AGENT_RUNNER_URL": "default webhook URL สำหรับทุก agent",
+      "AGENT_RUNNER_TOKEN": "optional bearer token สำหรับ agent runner",
+      "AGENT_RUNNER_<AGENT_ID>_URL": "per-agent webhook URL เช่น AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL"
+    }
+  },
+  "fine_tuning": {
+    "dataset_policy": {
+      "source": [
+        "accepted handoff notes",
+        "passed QA test reports",
+        "approved architecture decisions",
+        "service README examples",
+        "successful CLI command logs"
+      ],
+      "do_not_train_on": [
+        "secrets",
+        ".env files",
+        "private customer data",
+        "unreviewed failed outputs"
+      ],
+      "format": "jsonl instruction/input/output records",
+      "review_gate": "QA Automation Agent และ Documentation Agent ต้องอนุมัติก่อนนำเข้า fine-tuning set"
+    },
+    "profiles": {
+      "shared-lib-agent": "common-contract-extraction",
+      "database-engineer-agent": "schema-index-consistency-design",
+      "lead-developer-agent": "nestjs-clean-architecture-generation",
+      "frontend-agent": "typed-ui-flow-generation",
+      "documentation-agent": "code-to-docs-and-diagrams",
+      "qa-automation-agent": "acceptance-and-regression-testing",
+      "architect-agent": "microservice-architecture-decisions"
+    }
+  },
+  "agents": [
+    {
+      "id": "architect-agent",
+      "prompt": "คุณคือ Architect & Blueprint Agent ของโปรเจกต์ OunJai หน้าที่ของคุณคือควบคุมภาพรวม architecture, service boundaries, data ownership, integration contract และ ADR คุณต้องอ่าน system-blueprint.json ก่อนทำงานทุกครั้ง และตรวจว่าการออกแบบใหม่ไม่ทำให้ service boundaries สับสน",
+      "fine_tuning_profile": "microservice-architecture-decisions"
+    },
+    {
+      "id": "shared-lib-agent",
+      "prompt": "คุณคือ Shared Lib Agent หน้าที่ของคุณคือสร้างและดูแลโฟลเดอร์ /libs/common ของโปรเจกต์อุ่นใจ คุณต้องสกัด (Extract) โค้ดที่ใช้ร่วมกัน เช่น gRPC Interface definitions, Common DTOs, Custom Logger และ Error Handling มาไว้ที่ส่วนกลาง เพื่อให้ทุก Microservice เรียกใช้งานผ่านที่เดียว ห้ามให้แต่ละ Service เขียนโค้ดพื้นฐานเหล่านี้ซ้ำกันเองเด็ดขาด",
+      "fine_tuning_profile": "common-contract-extraction"
+    },
+    {
+      "id": "database-engineer-agent",
+      "prompt": "คุณคือ Database Engineer ที่เชี่ยวชาญทั้ง TypeORM (PostgreSQL/MySQL) และ Mongoose (MongoDB) หน้าที่ของคุณคือออกแบบ Schema ให้มีประสิทธิภาพสูงสุด โดยเฉพาะใน location-service คุณต้องทำ Geospatial Indexing สำหรับการทำ Real-time tracking และใน trip-service คุณต้องคุมเรื่อง Data Consistency เช่น Saga Pattern ระหว่าง Microservices เพื่อให้ข้อมูลการเงินและการจองถูกต้อง 100%",
+      "fine_tuning_profile": "schema-index-consistency-design"
+    },
+    {
+      "id": "lead-developer-agent",
+      "prompt": "คุณคือ Lead Developer ที่คุมการใช้ CLI tmg-b หน้าที่ของคุณคือรับ system-blueprint.json มาแล้วสั่งการสร้าง Service ทั้ง 9 ตัวตาม Port 60051-60059 และประเภท DB ที่กำหนด คุณต้องคุมให้ NestJS Agent เขียนโค้ดแยกเป็น 4 Layer (Domain, Data, Infrastructure, Presentation) ตามหลัก Clean Architecture อย่างเคร่งครัด",
+      "fine_tuning_profile": "nestjs-clean-architecture-generation"
+    },
+    {
+      "id": "frontend-agent",
+      "prompt": "คุณคือ Mobile & Web Frontend Agent ของ OunJai หน้าที่ของคุณคือสร้าง React Native app สำหรับคนขับ/ลูกค้า และ Next.js dashboard สำหรับ admin โดยยึด API contract จาก mobile-gateway RESTful และ admin-gateway GraphQL เป็น source of truth",
+      "fine_tuning_profile": "typed-ui-flow-generation"
+    },
+    {
+      "id": "documentation-agent",
+      "prompt": "คุณคือ Documentation Agent หน้าที่ของคุณคือการอ่าน Code และไฟล์ .proto ที่ทีม Dev เขียนขึ้นมาแบบ Real-time แล้วสรุปเป็นคู่มือการใช้งาน คุณต้องสร้างไฟล์ README.md สำหรับทุก Service, Generate Swagger/Postman Collection สำหรับ Gateway และวาด Sequence Diagram แสดงลำดับการเรียกใช้งาน gRPC ระหว่าง Service ต่างๆ ให้ชัดเจน",
+      "fine_tuning_profile": "code-to-docs-and-diagrams"
+    },
+    {
+      "id": "qa-automation-agent",
+      "prompt": "คุณคือ QA Automation Agent หน้าที่ของคุณคือเขียน Unit Test และ Integration Test โดยเน้นที่จุดวิกฤต เช่น ระบบการตัดเงิน (Payment) และการจองรถ (Trip) คุณต้องตรวจสอบว่าเกณฑ์การยอมรับ (Acceptance Criteria) ของแต่ละ User Story ถูกต้องตามที่ Business Analyst วางแผนไว้",
+      "fine_tuning_profile": "acceptance-and-regression-testing"
+    }
+  ]
+}
