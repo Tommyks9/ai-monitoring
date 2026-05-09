@@ -29,6 +29,21 @@
     ],
     "fallback": "ถ้าไม่ตั้ง CURSOR_AGENT_COMMAND worker จะสร้าง handoff ภาษาไทยเพื่อทดสอบ flow แต่ยังไม่ได้เรียก Cursor Agent จริง"
   },
+  "openclaw_agent_worker": {
+    "script": "npm run openclaw-worker",
+    "default_url": "http://localhost:5055/agent-dispatch",
+    "command_env": "OPENCLAW_COMMAND",
+    "api_url_env": "OPENCLAW_API_URL",
+    "api_key_env": "OPENCLAW_API_KEY",
+    "model_env": "OPENCLAW_MODEL",
+    "prompt_placeholders": [
+      "{promptFile}",
+      "{outputFile}",
+      "{workItemId}",
+      "{agentId}"
+    ],
+    "fallback": "ถ้าไม่ตั้ง OPENCLAW_COMMAND หรือ OPENCLAW_API_URL worker จะสร้าง handoff ภาษาไทยเพื่อทดสอบ flow แต่ยังไม่ได้เรียก OpenClaw จริง"
+  },
   "communication": {
     "language": "th-TH",
     "policy": "ทุก agent ต้องสื่อสารกับ owner เป็นภาษาไทยก่อนเสมอ ทั้ง progress, blocker, handoff, risk และ recommendation ยกเว้นชื่อไฟล์ โค้ด command endpoint และ identifier ทางเทคนิค",

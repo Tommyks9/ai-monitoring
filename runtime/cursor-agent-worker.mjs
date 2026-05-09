@@ -13,10 +13,16 @@ loadLocalEnv();
 const port = Number(process.env.AGENT_WORKER_PORT ?? 5050);
 const runnerToken = process.env.AGENT_RUNNER_TOKEN ?? "";
 const runtimeToken = process.env.AGENT_RUNTIME_TOKEN ?? "";
-const cursorAgentCommand = process.env.CURSOR_AGENT_COMMAND ?? "";
-const cursorAgentTimeoutMs = Number(process.env.CURSOR_AGENT_TIMEOUT_MS ?? 600000);
-const autoComplete = process.env.CURSOR_AGENT_AUTO_COMPLETE !== "false";
-const workerMode = cursorAgentCommand ? "cursor-agent" : "thai-fallback";
+const providerName = process.env.AGENT_WORKER_PROVIDER ?? "Cursor Agent";
+const providerSlug = process.env.AGENT_WORKER_PROVIDER_SLUG ?? "cursor-agent";
+const agentCommand = process.env.AGENT_WORKER_COMMAND ?? process.env.CURSOR_AGENT_COMMAND ?? "";
+const agentApiUrl = process.env.AGENT_WORKER_API_URL ?? "";
+const agentApiKey = process.env.AGENT_WORKER_API_KEY ?? "";
+const agentModel = process.env.AGENT_WORKER_MODEL ?? "";
+const agentTimeoutMs = Number(process.env.AGENT_WORKER_TIMEOUT_MS ?? process.env.CURSOR_AGENT_TIMEOUT_MS ?? 600000);
+const autoComplete = process.env.AGENT_WORKER_AUTO_COMPLETE ?? process.env.CURSOR_AGENT_AUTO_COMPLETE ?? "true";
+const shouldAutoComplete = autoComplete !== "false";
+const workerMode = agentCommand ? `${providerSlug}-command` : agentApiUrl ? `${providerSlug}-api` : "thai-fallback";
 const runsDir = join(rootDir, ".agent-runs");
 
 mkdirSync(runsDir, { recursive: true });
@@ -40,10 +46,11 @@ const server = createServer(async (request, response) => {
 
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
       sendJson(response, 200, {
-        name: "OunJai Cursor Agent Worker",
+        name: `OunJai ${providerName} Worker`,
         status: "ok",
         mode: workerMode,
-        cursorAgentCommand: cursorAgentCommand ? "configured" : "not_configured",
+        command: agentCommand ? "configured" : "not_configured",
+        apiUrl: agentApiUrl ? "configured" : "not_configured",
         port,
       });
       return;
@@ -67,9 +74,10 @@ const server = createServer(async (request, response) => {
         accepted: true,
         mode: workerMode,
         workItemId,
-        message: cursorAgentCommand
-          ? "รับงานแล้ว กำลังส่งต่อให้ Cursor Agent"
-          : "รับงานแล้ว แต่ยังไม่ได้ตั้ง CURSOR_AGENT_COMMAND จึงใช้โหมด fallback ภาษาไทย",
+        message:
+          agentCommand || agentApiUrl
+            ? `รับงานแล้ว กำลังส่งต่อให้ ${providerName}`
+            : `รับงานแล้ว แต่ยังไม่ได้ตั้ง command/API ของ ${providerName} จึงใช้โหมด fallback ภาษาไทย`,
       });
       return;
     }
@@ -82,8 +90,14 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`OunJai Cursor Agent Worker พร้อมใช้งานที่ http://localhost:${port}`);
-  console.log(cursorAgentCommand ? "ตั้งค่า CURSOR_AGENT_COMMAND แล้ว" : "ยังไม่ได้ตั้ง CURSOR_AGENT_COMMAND: ใช้ fallback ภาษาไทย");
+  console.log(`OunJai ${providerName} Worker พร้อมใช้งานที่ http://localhost:${port}`);
+  console.log(
+    agentCommand
+      ? `ตั้งค่า command ของ ${providerName} แล้ว`
+      : agentApiUrl
+        ? `ตั้งค่า API URL ของ ${providerName} แล้ว`
+        : `ยังไม่ได้ตั้ง command/API ของ ${providerName}: ใช้ fallback ภาษาไทย`,
+  );
 });
 
 async function runWorkItem(payload) {
@@ -103,12 +117,14 @@ async function runWorkItem(payload) {
     workItemId: workItem.id,
     status: "working",
     progress: 15,
-    lastSignal: `${agent.name} รับงาน ${workItem.id} แล้ว และกำลังเตรียม prompt สำหรับ Cursor Agent`,
+    lastSignal: `${agent.name} รับงาน ${workItem.id} แล้ว และกำลังเตรียม prompt สำหรับ ${providerName}`,
   });
 
-  const result = cursorAgentCommand
-    ? await executeCursorAgentCommand({ payload, prompt, promptFile, outputFile, runDir })
-    : await runThaiFallbackAgent({ payload, outputFile });
+  const result = agentCommand
+    ? await executeAgentCommand({ payload, prompt, promptFile, outputFile, runDir })
+    : agentApiUrl
+      ? await executeAgentApi({ payload, prompt, outputFile })
+      : await runThaiFallbackAgent({ payload, outputFile });
 
   await postCallback(callbackBaseUrl, endpoints.heartbeat, {
     workItemId: workItem.id,
@@ -129,61 +145,115 @@ async function runWorkItem(payload) {
     lastSignal: result.summary,
   });
 
-  if (autoComplete && result.ok) {
+  if (shouldAutoComplete && result.ok) {
     await postCallback(callbackBaseUrl, endpoints.state, {
       state: "done",
       agent: agent.name,
       handoff: result.handoff,
-      note: `${workItem.id} ปิดงานโดย Cursor Agent Worker แล้ว`,
+      note: `${workItem.id} ปิดงานโดย ${providerName} Worker แล้ว`,
       lastSignal: result.summary,
     }, "PATCH");
   }
 }
 
-async function executeCursorAgentCommand({ payload, prompt, promptFile, outputFile, runDir }) {
-  const command = renderCommand(cursorAgentCommand, {
+async function executeAgentCommand({ payload, prompt, promptFile, outputFile, runDir }) {
+  const command = renderCommand(agentCommand, {
     promptFile,
     outputFile,
     workItemId: payload.workItem.id,
     agentId: payload.agent.id,
   });
-  const cwd = resolve(rootDir, process.env.CURSOR_AGENT_WORKDIR ?? ".");
+  const cwd = resolve(rootDir, process.env.AGENT_WORKER_WORKDIR ?? process.env.CURSOR_AGENT_WORKDIR ?? ".");
 
   const execution = await runShellCommand(command, {
     cwd,
     input: command.includes(shellQuote(promptFile)) || command.includes(promptFile) ? "" : prompt,
-    timeoutMs: cursorAgentTimeoutMs,
+    timeoutMs: agentTimeoutMs,
     env: {
       OUNJAI_WORK_ITEM_ID: payload.workItem.id,
       OUNJAI_AGENT_ID: payload.agent.id,
       OUNJAI_PROMPT_FILE: promptFile,
       OUNJAI_OUTPUT_FILE: outputFile,
+      OUNJAI_AGENT_PROVIDER: providerName,
     },
   });
 
   const output = [execution.stdout, execution.stderr].filter(Boolean).join("\n\n").trim();
-  const storedOutput = output || "Cursor Agent command ทำงานเสร็จแล้วแต่ไม่มี output";
+  const storedOutput = output || `${providerName} command ทำงานเสร็จแล้วแต่ไม่มี output`;
   writeFileSync(outputFile, storedOutput);
 
   if (execution.code !== 0) {
     return {
       ok: false,
-      summary: `Cursor Agent command ล้มเหลวด้วย exit code ${execution.code}`,
+      summary: `${providerName} command ล้มเหลวด้วย exit code ${execution.code}`,
       handoff: storedOutput.slice(0, 4000),
     };
   }
 
   return {
     ok: true,
-    summary: `Cursor Agent ทำงาน ${payload.workItem.id} เสร็จแล้ว`,
+    summary: `${providerName} ทำงาน ${payload.workItem.id} เสร็จแล้ว`,
     handoff: [
       `## Handoff ภาษาไทยจาก ${payload.agent.name}`,
       "",
       `### งาน`,
       `- ${payload.workItem.id}: ${payload.workItem.title}`,
       "",
-      `### ผลลัพธ์จาก Cursor Agent`,
+      `### ผลลัพธ์จาก ${providerName}`,
       storedOutput.slice(0, 6000),
+    ].join("\n"),
+  };
+}
+
+async function executeAgentApi({ payload, prompt, outputFile }) {
+  const response = await fetch(agentApiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(agentApiKey ? { Authorization: `Bearer ${agentApiKey}` } : {}),
+    },
+    body: JSON.stringify({
+      provider: providerSlug,
+      model: agentModel || undefined,
+      prompt,
+      agent: payload.agent,
+      workItem: payload.workItem,
+      sourceOfTruth: payload.sourceOfTruth,
+      communication: payload.communication,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = data.error ?? data.message ?? `${providerName} API ตอบกลับด้วยสถานะ ${response.status}`;
+    return {
+      ok: false,
+      summary: message,
+      handoff: JSON.stringify(data, null, 2).slice(0, 4000),
+    };
+  }
+
+  const output =
+    data.handoff ??
+    data.output ??
+    data.content ??
+    data.message ??
+    data.result ??
+    `${providerName} API ทำงานเสร็จแล้วแต่ไม่ได้ส่ง output กลับมา`;
+  writeFileSync(outputFile, String(output));
+
+  return {
+    ok: true,
+    summary: `${providerName} API ทำงาน ${payload.workItem.id} เสร็จแล้ว`,
+    handoff: [
+      `## Handoff ภาษาไทยจาก ${payload.agent.name}`,
+      "",
+      `### งาน`,
+      `- ${payload.workItem.id}: ${payload.workItem.title}`,
+      "",
+      `### ผลลัพธ์จาก ${providerName} API`,
+      String(output).slice(0, 6000),
     ].join("\n"),
   };
 }
@@ -192,7 +262,7 @@ async function runThaiFallbackAgent({ payload, outputFile }) {
   const handoff = [
     `## Handoff จำลองภาษาไทยจาก ${payload.agent.name}`,
     "",
-    `> หมายเหตุ: ยังไม่ได้ตั้ง CURSOR_AGENT_COMMAND จึงยังไม่ได้เรียก Cursor Agent CLI จริง`,
+    `> หมายเหตุ: ยังไม่ได้ตั้ง command/API ของ ${providerName} จึงยังไม่ได้เรียก agent worker จริง`,
     "",
     `### งาน`,
     `- รหัสงาน: ${payload.workItem.id}`,
@@ -203,9 +273,9 @@ async function runThaiFallbackAgent({ payload, outputFile }) {
     `- ${payload.workItem.acceptanceGate}`,
     "",
     `### คำแนะนำขั้นต่อไป`,
-    `1. ตั้งค่า CURSOR_AGENT_COMMAND ให้ชี้ไปยังคำสั่ง Cursor Agent ในเครื่องคุณ`,
-    `2. รัน npm run cursor-worker อีกครั้ง`,
-    `3. ส่งงานใหม่จาก dashboard เพื่อให้ worker เรียก Cursor Agent จริง`,
+    `1. ตั้งค่า command หรือ API URL ของ ${providerName}`,
+    `2. รัน worker อีกครั้ง`,
+    `3. ส่งงานใหม่จาก dashboard เพื่อให้ worker เรียก ${providerName} จริง`,
   ].join("\n");
   writeFileSync(outputFile, handoff);
 
@@ -220,7 +290,7 @@ function buildCursorAgentPrompt(payload) {
   const { agent, workItem, communication, sourceOfTruth, callbackEndpoints, runtime } = payload;
 
   return [
-    `# งานสำหรับ Cursor Agent`,
+    `# งานสำหรับ ${providerName}`,
     "",
     `คุณคือ ${agent.name} ในทีม OunJai AI Software House`,
     "",
@@ -281,7 +351,7 @@ function runShellCommand(command, { cwd, input, timeoutMs, env }) {
       resolvePromise({
         code: 124,
         stdout,
-        stderr: `${stderr}\nหมดเวลารอ Cursor Agent หลัง ${timeoutMs}ms`.trim(),
+        stderr: `${stderr}\nหมดเวลารอ ${providerName} หลัง ${timeoutMs}ms`.trim(),
       });
     }, timeoutMs);
 

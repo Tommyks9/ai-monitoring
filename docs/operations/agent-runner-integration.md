@@ -16,6 +16,44 @@ http://localhost:5050/agent-dispatch
 
 ถ้าตั้ง `CURSOR_AGENT_COMMAND` worker จะเรียก Cursor Agent/CLI จริง ถ้าไม่ตั้งจะ fallback เป็น handoff ภาษาไทยเพื่อให้ flow runtime/dashboard ทดสอบได้ครบก่อน
 
+## OpenClaw Agent Worker
+
+ถ้าต้องการใช้ OpenClaw แทน Cursor Worker ให้รัน:
+
+```bash
+npm run openclaw-worker
+```
+
+ค่า default:
+
+```text
+http://localhost:5055/agent-dispatch
+```
+
+แล้วตั้ง runtime runner:
+
+```bash
+AGENT_RUNNER_URL=http://localhost:5055/agent-dispatch
+```
+
+OpenClaw Worker รองรับ 2 วิธี:
+
+### 1. เรียก OpenClaw ผ่าน CLI
+
+```bash
+OPENCLAW_COMMAND=openclaw run --prompt-file {promptFile}
+```
+
+### 2. เรียก OpenClaw ผ่าน HTTP API
+
+```bash
+OPENCLAW_API_URL=http://localhost:6060/agent
+OPENCLAW_API_KEY=
+OPENCLAW_MODEL=
+```
+
+worker จะส่ง JSON ไปที่ `OPENCLAW_API_URL` พร้อม `prompt`, `agent`, `workItem`, `sourceOfTruth` และ `communication`
+
 ## Runtime dispatch modes
 
 ตั้งค่าผ่าน `.env.local`:
@@ -64,6 +102,12 @@ CURSOR_AGENT_COMMAND=cursor-agent --prompt-file {promptFile}
 AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL=http://localhost:5051/dispatch
 AGENT_RUNNER_SHARED_LIB_AGENT_URL=http://localhost:5052/dispatch
 AGENT_RUNNER_DATABASE_ENGINEER_AGENT_URL=http://localhost:5053/dispatch
+```
+
+ถ้าต่อ OpenClaw แยก agent ก็ใช้ pattern เดียวกัน เช่น:
+
+```bash
+AGENT_RUNNER_LEAD_DEVELOPER_AGENT_URL=http://localhost:5055/agent-dispatch
 ```
 
 ชื่อ env ต่อ agent ใช้ rule:

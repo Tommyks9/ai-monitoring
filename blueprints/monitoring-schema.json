@@ -92,7 +92,10 @@
       "dispatch_mode_env": "AGENT_DISPATCH_MODE",
       "agent_runner_url_env": "AGENT_RUNNER_URL",
       "cursor_worker_script": "npm run cursor-worker",
-      "cursor_agent_command_env": "CURSOR_AGENT_COMMAND"
+      "cursor_agent_command_env": "CURSOR_AGENT_COMMAND",
+      "openclaw_worker_script": "npm run openclaw-worker",
+      "openclaw_command_env": "OPENCLAW_COMMAND",
+      "openclaw_api_url_env": "OPENCLAW_API_URL"
     },
     "api_endpoints": [
       "GET /health",

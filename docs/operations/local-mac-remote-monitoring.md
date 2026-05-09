@@ -76,6 +76,26 @@ CURSOR_AGENT_COMMAND=cursor-agent --prompt-file {promptFile}
 
 ถ้ายังไม่ตั้ง `CURSOR_AGENT_COMMAND` worker จะ fallback เป็น handoff ภาษาไทย เพื่อให้ flow monitor/dispatch ทดสอบได้ก่อน
 
+ถ้าต้องการใช้ OpenClaw แทน Cursor Worker ให้เปิด terminal สำหรับ OpenClaw:
+
+```bash
+npm run openclaw-worker
+```
+
+แล้วตั้ง:
+
+```bash
+AGENT_RUNNER_URL=http://localhost:5055/agent-dispatch
+OPENCLAW_COMMAND=openclaw run --prompt-file {promptFile}
+```
+
+หรือถ้า OpenClaw เปิดเป็น HTTP API:
+
+```bash
+OPENCLAW_API_URL=http://localhost:6060/agent
+OPENCLAW_API_KEY=
+```
+
 ## 4. Run dashboard
 
 เปิด terminal ที่สาม:

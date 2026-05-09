@@ -38,6 +38,12 @@ npm run runtime
 npm run cursor-worker
 ```
 
+หรือถ้าต้องการใช้ OpenClaw Agent Worker:
+
+```bash
+npm run openclaw-worker
+```
+
 เปิด terminal ที่สามสำหรับ Dashboard:
 
 ```bash
@@ -101,6 +107,15 @@ CURSOR_AGENT_COMMAND=cursor-agent
 CURSOR_AGENT_COMMAND=cursor-agent --prompt-file {promptFile}
 ```
 
+ถ้าใช้ OpenClaw ให้ชี้ runner ไปที่ port 5055 และตั้ง command/API ของ OpenClaw:
+
+```bash
+AGENT_RUNNER_URL=http://localhost:5055/agent-dispatch
+OPENCLAW_COMMAND=openclaw run --prompt-file {promptFile}
+# หรือ
+OPENCLAW_API_URL=http://localhost:6060/agent
+```
+
 ถ้าไม่ตั้งค่า `AGENT_RUNTIME_URL` dashboard จะใช้ mock data ใน repo และยัง run ได้ปกติ
 
 ### Validate
@@ -125,6 +140,7 @@ npm run build
 - `docs/templates/agent-task-brief.md` - template สำหรับเปิดงานให้ agent แต่ละตัว
 - `runtime/agent-runtime.mjs` - local Agent Runtime API สำหรับส่งสถานะ agents/tasks/events ให้ dashboard
 - `runtime/cursor-agent-worker.mjs` - worker ที่รับงานจาก runtime แล้วเรียก Cursor Agent/CLI หรือ fallback เป็น handoff ภาษาไทย
+- `runtime/openclaw-agent-worker.mjs` - worker สำหรับต่อ OpenClaw ผ่าน CLI command หรือ HTTP API
 - `src/app/page.tsx` - Next.js dashboard หน้า command center
 - `src/app/api/runtime/work-items/route.ts` - server-side proxy สำหรับส่ง task จาก dashboard ไป Agent Runtime
 
